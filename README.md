@@ -2,19 +2,38 @@
 
 **Zero-Knowledge Privacy Layer for Solana**
 
-Zert is a privacy-preserving protocol built on Solana that enables confidential token transactions using zero-knowledge proofs (zk-SNARKs). Users can shield tokens, perform anonymous swaps, and withdraw to any address without revealing transaction histories or linkages.
+Zert is a Solana-based protocol for private DeFi using zero-knowledge proofs. It enables confidential deposits, swaps, and withdrawals of SOL and any SPL tokens while maintaining full verifiability on-chain.
+
+Built on a sparse Merkle tree for UTXO commitments and Groth16 ZKPs for transaction validity, Zert ensures privacy without compromising security or scalability.
 
 ---
 
-## Overview
+## Key Features
 
-Zert implements a UTXO-based privacy model with Groth16 zk-SNARKs to provide strong anonymity guarantees while maintaining full on-chain verifiability. The protocol integrates with Jupiter aggregator for private token swaps at market rates.
+### Shield (Deposit)
+Deposit any SPL token into the private pool with hidden amounts. Each UTXO internally tracks its mint, allowing you to hold multiple token types in a unified privacy set.
 
-**Key Features:**
-- **Shield Tokens**: Deposit SPL tokens into a private pool
-- **Private Swaps**: Exchange tokens anonymously via Jupiter integration
-- **Anonymous Withdrawals**: Unshield tokens to any address, breaking on-chain linkages
-- **High Throughput**: Leverages Solana's performance for 2000+ TPS
+**Technology:**
+- Modified Circom circuits based on Tornado Nova
+- Multi-token balance changes in a single proof
+- All UTXOs for all tokens stored together in one pool
+
+### Private Swaps
+Exchange any tokens atomically through Jupiter aggregator integration, including launchpad tokens. All swaps happen in a single instruction with full privacy.
+
+**How it works:**
+- Program authority (PDA) acts as the public buyer for all operations
+- No copy-trading: external observers only see the program's PDA trading
+- Ability to privately hold LST tokens, enabling private yield strategies
+- Grows the anonymity set over time
+
+### Unshield (Withdrawal)
+Withdraw tokens to any address through a relayer, breaking on-chain linkages between deposits and withdrawals.
+
+**Security:**
+- All withdrawals processed through relayer
+- Additional signature verification of withdrawal data in the smart contract
+- No direct link between depositor and recipient
 
 **Deployed Program:** `6Uok9UsjztPC9VJ3a8ZpawzKmgrD2VvMKQGb64FYjhnx`
 
@@ -22,57 +41,66 @@ Zert implements a UTXO-based privacy model with Groth16 zk-SNARKs to provide str
 
 ## Architecture
 
-The protocol consists of four main components:
-
-### 1. Smart Contract (Solana Program)
+### Smart Contract (Solana Program)
 Location: `/program/`
 
-The on-chain program manages:
-- Merkle tree with 67M commitment capacity (height 26)
+**Core Components:**
+- Sparse Merkle tree with 67M commitment capacity (height 26)
+- Unified UTXO pool for all SPL tokens (SOL, USDC, USDT, LSTs, launchpad tokens)
 - Nullifier registry for double-spend prevention
-- Token reserves for supported SPL tokens
-- Groth16 proof verification using Light Protocol
+- Groth16 proof verification via Light Protocol
+- Jupiter CPI integration for atomic swaps
 
-**Supported Instructions:**
-- `initialize`: Bootstrap Merkle tree
-- `deposit`: Shield tokens into private pool
-- `withdraw`: Unshield tokens to public address
-- `swap`: Exchange tokens privately via Jupiter
+**Instructions:**
+- `deposit`: Shield any SPL token into private pool
+- `withdraw`: Unshield tokens via relayer with signature verification
+- `swap`: Private atomic swaps through Jupiter aggregator
 
-### 2. Zero-Knowledge Circuits
+**Technical Innovation:**
+- Each UTXO internally tracks its mint type
+- Multi-token support in single proof (modified Tornado Nova circuits)
+- Program PDA acts as public trader, preventing copy-trading
+- Single-instruction atomic swaps with full privacy
+
+### Zero-Knowledge Circuits
 Location: `/circuits/`
 
-Built with Circom 2.0, the circuit validates:
-- Merkle inclusion proofs for input UTXOs
-- Correct nullifier derivation
-- Balance equations
-- Ownership verification via private keys
+Modified Circom circuits based on Tornado Nova architecture.
+
+**Key Modifications:**
+- Multi-token balance validation in single proof
+- Support for token type changes (swaps)
+- Maintains privacy across different SPL mints
 
 **Parameters:**
-- Tree height: 26 levels
-- Inputs per transaction: 2
-- Outputs per transaction: 2
+- Merkle tree height: 26 levels
+- Inputs per transaction: 2 UTXOs
+- Outputs per transaction: 2 UTXOs
 - Proof system: Groth16 on BN254 curve
 
-### 3. Indexer Service
+### Indexer & Relayer
 Location: `/indexer/`
 
-Backend service that:
-- Monitors Solana blockchain for Zert transactions
-- Maintains merkle tree state
-- Stores encrypted UTXO data
-- Provides REST API for wallet reconstruction
-- Optional relayer functionality for gasless withdrawals
+**Indexer Functions:**
+- Monitors blockchain for commitment events
+- Maintains synchronized Merkle tree state
+- Stores encrypted UTXO metadata
+- Provides REST API for proof generation
 
-### 4. Frontend Application
+**Relayer Functions:**
+- Processes withdrawal requests with signature verification
+- Submits transactions on behalf of users
+- Breaks on-chain linkage between deposits and withdrawals
+- Enforces additional security checks in smart contract
+
+### Frontend
 Location: `/frontend/`
 
-React-based web interface with:
-- Wallet connection (Phantom, Solflare, etc.)
-- Token shielding interface
-- Private swap panel
-- Portfolio management
-- Withdrawal interface
+React application with private DeFi interface:
+- Shield: Deposit any SPL token
+- Swap: Private trading via Jupiter
+- Unshield: Withdraw to any address
+- Portfolio: View private balances across all tokens
 
 ---
 
@@ -191,127 +219,50 @@ yarn build
 
 ---
 
-## Usage Examples
-
-### Shielding Tokens (Deposit)
-
-```typescript
-import { deposit } from './lib/sdk/deposit';
-
-// Shield 1 USDC
-const result = await deposit({
-  amount: 1_000_000, // 1 USDC (6 decimals)
-  mintAddress: 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v',
-  wallet: walletAdapter,
-});
-
-console.log('Transaction:', result.signature);
-console.log('New UTXOs created');
-```
-
-### Private Swap
-
-```typescript
-import { swap } from './lib/sdk/swap';
-
-// Swap USDC for SOL privately
-const result = await swap({
-  inputMint: 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v', // USDC
-  outputMint: 'So11111111111111111111111111111111111111112',  // wSOL
-  inputAmount: 10_000_000, // 10 USDC
-  wallet: walletAdapter,
-});
-```
-
-### Unshielding Tokens (Withdrawal)
-
-```typescript
-import { withdraw } from './lib/sdk/withdraw';
-
-// Withdraw to any address
-const result = await withdraw({
-  amount: 5_000_000, // 5 USDC
-  recipient: new PublicKey('...'),
-  mintAddress: 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v',
-  wallet: walletAdapter,
-});
-```
-
----
 
 ## Supported Tokens
 
-Currently supported SPL tokens:
+Zert supports **any SPL token** through its unified UTXO pool architecture. Each UTXO internally tracks its mint type, allowing multiple token types to share the same anonymity set.
+
+**Pre-configured tokens:**
 - **SOL** (wrapped): `So11111111111111111111111111111111111111112`
 - **USDC**: `EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v`
 - **USDT**: `Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB`
 - **ZEC**: `A7bdiYdS5GjqGFtxf17ppRHtDKPkkRqbKtR27dxvQXaS`
 
-Additional tokens can be added by creating reserve accounts in the program.
+**Additional tokens** (LSTs, launchpad tokens, etc.) can be added by creating reserve accounts in the program. All tokens share the same privacy pool, maximizing anonymity set size.
 
 ---
 
-## API Documentation
+## Technical Advantages
 
-### Indexer REST API
+### Atomic Private Swaps
+All swaps execute in a single instruction with full atomicity:
+- Zero-knowledge proof validates input UTXOs
+- Jupiter CPI executes the swap
+- New UTXOs created with swapped tokens
+- All in one transaction with no intermediate states
 
-**Base URL:** `http://localhost:3000`
+### Anti-Copy-Trading
+The program's PDA acts as the public buyer for all operations:
+- External observers see only the program trading
+- Individual user strategies remain private
+- No on-chain correlation between users
+- Prevents MEV and front-running of private trades
 
-#### Health Check
-```
-GET /health
-```
+### Private Yield Strategies
+Hold LST tokens (stSOL, mSOL, jitoSOL) privately:
+- Accrue staking rewards while maintaining privacy
+- Swap between LSTs without revealing positions
+- Time-based strategies hidden from competitors
+- Grows protocol TVL and anonymity set
 
-#### Get Merkle Root
-```
-GET /root
-Response: { "root": "...", "timestamp": "..." }
-```
-
-#### Get All Commitments
-```
-GET /commitments
-Response: { "commitments": [...], "count": N }
-```
-
-#### Get Specific Commitment
-```
-GET /commitments/:index
-Response: { "commitment": "...", "index": N, ... }
-```
-
-#### Get Merkle Proof
-```
-GET /proof/:commitment
-Response: { "pathElements": [...], "pathIndices": [...] }
-```
-
-#### Get Tree Info
-```
-GET /tree/info
-Response: { "root": "...", "height": 26, "currentSize": N }
-```
-
-### Relayer Endpoints (if enabled)
-
-#### Submit Withdrawal
-```
-POST /relayer/withdraw
-Body: { proof, extDataMinified, encryptedOutput1, encryptedOutput2, recipient, ... }
-Response: { "jobId": "...", "statusUrl": "/relayer/status/..." }
-```
-
-#### Check Job Status
-```
-GET /relayer/status/:jobId
-Response: { "status": "completed|pending|failed", "result": {...} }
-```
-
-#### Queue Statistics
-```
-GET /relayer/queue/stats
-Response: { "total": N, "pending": M, ... }
-```
+### Unified Privacy Pool
+All tokens share the same UTXO set:
+- Larger anonymity set compared to per-token pools
+- Cross-token privacy protection
+- More efficient capital utilization
+- Better privacy guarantees as protocol grows
 
 ---
 
@@ -329,103 +280,52 @@ yarn test:bankrun
 yarn test:localnet
 ```
 
-### Circuit Tests
-
-```bash
-cd circuits
-
-# Generate test witness
-node artifacts/transaction2_js/generate_witness.js \
-  artifacts/transaction2_js/transaction2.wasm \
-  input.json \
-  witness.wtns
-
-# Generate and verify proof
-snarkjs groth16 prove \
-  artifacts/transaction2.zkey \
-  witness.wtns \
-  proof.json \
-  public.json
-```
-
-### Integration Testing
-
-See `/program/tests/` for comprehensive test suites covering:
-- Deposits and withdrawals
-- Private swaps with Jupiter
-- Merkle tree updates
-- Nullifier verification
-- Edge cases and error conditions
-
----
-
-## Security
-
-### Cryptographic Primitives
-
-- **Groth16 zk-SNARKs**: 256-byte proofs on BN254 curve
-- **Poseidon Hash**: Circuit-optimized hash function
-- **Merkle Tree**: Sparse binary tree with 26 levels
-
-### Privacy Guarantees
-
-**Protected Against:**
-- Transaction graph analysis
-- Balance enumeration
-- Front-running
-- MEV extraction
-
-**Known Limitations:**
-- Small anonymity set initially (grows with usage)
-- Timing correlation attacks
-- Relayer knows recipient addresses
-- Deposit/withdrawal amount correlation
-
-### Security Assumptions
-
-1. Trusted setup integrity (Groth16 ceremony)
-2. BN254 discrete log hardness
-3. Poseidon collision resistance
-4. Circuit correctness
-5. Solana network liveness
+See `/program/tests/` for comprehensive test suites covering deposits, withdrawals, private swaps, and edge cases.
 
 ---
 
 ## Performance
 
-### Compute Efficiency
+**Compute Efficiency per Transaction:**
+- Groth16 proof verification: ~280k compute units
+- UTXO updates and Merkle tree: ~70k compute units
+- Jupiter CPI (for swaps): ~50k compute units
+- **Total: ~400k compute units** (well within Solana's 1.4M limit)
 
-**Per Transaction:**
-- Groth16 verification: ~280k compute units
-- UTXO updates: ~70k compute units
-- Jupiter CPI: ~50k compute units
-- **Total: ~400k compute units** (well within 1.4M limit)
+**Transaction Cost:**
+- ~$0.01 per private transaction
+- 2000+ theoretical TPS on Solana
+- Sub-second confirmation times
 
-### Comparison with Alternatives
+---
 
-| Protocol | Cost per TX | Blockchain | Throughput |
-|----------|-------------|------------|------------|
-| Zert | ~$0.01 | Solana | 2000+ TPS |
-| Tornado Cash | $50+ | Ethereum | ~15 TPS |
-| Aztec | $10+ | Ethereum | ~10 TPS |
-| Railgun | $20+ | Ethereum | ~15 TPS |
+## Security
+
+**Cryptographic Primitives:**
+- **Groth16 zk-SNARKs**: 256-byte proofs on BN254 curve
+- **Poseidon Hash**: Circuit-optimized hash function
+- **Sparse Merkle Tree**: 26 levels, 67M capacity
+
+**Withdrawal Security:**
+- All withdrawals processed through relayer to break on-chain linkages
+- Additional signature verification in smart contract for withdrawal data
+- Prevents unauthorized withdrawals even if relayer is compromised
+
+**Privacy Properties:**
+- Unified pool for all tokens maximizes anonymity set
+- Program PDA as public trader prevents copy-trading
+- No correlation between deposit and withdrawal addresses
+- Private swaps hide trading strategies
+
+**Known Limitations:**
+- Anonymity set grows with protocol usage
+- Relayer sees recipient addresses (but cannot link to deposits)
+- Timing analysis may correlate deposits/withdrawals
+- Amount correlation possible for similar values
 
 ---
 
 ## Development
-
-### Project Structure
-
-```
-zert/
-├── circuits/          # Circom circuits and artifacts
-├── frontend/           # React web application
-├── indexer/            # Backend service and relayer
-├── program/            # Solana program (Rust/Anchor)
-├── relayer/            # Relayer service configuration
-├── README.md           # This file
-└── WHITEPAPER.md       # Technical whitepaper
-```
 
 ### Building from Source
 
@@ -450,110 +350,14 @@ cd frontend && yarn build
 cd indexer && yarn build
 ```
 
-### Contributing
-
-1. Fork the repository
-2. Create feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit changes (`git commit -m 'Add amazing feature'`)
-4. Push to branch (`git push origin feature/amazing-feature`)
-5. Open Pull Request
-
 ---
 
-## Roadmap
+## Documentation
 
-### Phase 1: Launch (Current)
-- Core deposit/withdraw functionality
-- Private swaps via Jupiter
-- Basic frontend and relayer
-
-### Phase 2: Enhanced Privacy (Q1 2026)
-- Decentralized relayer network
-- Tor integration
-- Mobile wallet support
-
-### Phase 3: Advanced Features (Q2 2026)
-- Private lending protocols
-- Shielded staking
-- Privacy-preserving governance
-
-### Phase 4: Ecosystem (Q3 2026)
-- Developer SDK
-- Multi-chain expansion
-- Compliance tools
-
----
-
-## Resources
-
-### Documentation
-- [Whitepaper](./WHITEPAPER.md) - Detailed technical specification
 - [Program README](./program/README.md) - Smart contract documentation
 - [Indexer README](./indexer/README.md) - Backend service guide
 - [Circuits README](./circuits/README.md) - ZK circuit documentation
 
-### External Resources
-- [Light Protocol](https://github.com/Lightprotocol/groth16-solana) - Groth16 verifier
-- [Jupiter Aggregator](https://jup.ag) - Swap integration
-- [Circom](https://docs.circom.io) - Circuit language
-- [Anchor Framework](https://www.anchor-lang.com) - Solana development
-
-### Papers & References
-1. "On the Size of Pairing-based Non-interactive Arguments" - Jens Groth, 2016
-2. "Poseidon: A New Hash Function for Zero-Knowledge Proof Systems" - Grassi et al., 2019
-3. "Zcash Protocol Specification" - Hopwood et al.
-
 ---
 
-## Troubleshooting
-
-### Common Issues
-
-**"Program ID not found"**
-- Deploy the program first: `anchor deploy`
-- Update program ID in `Anchor.toml` and frontend config
-
-**"Insufficient compute units"**
-- Increase compute budget in transaction
-- Check for account size limits
-
-**"Merkle root mismatch"**
-- Ensure indexer is synced with on-chain state
-- Restart indexer to rebuild tree
-
-**"Proof verification failed"**
-- Verify circuit artifacts match deployed verifying key
-- Check input format and public signals
-
-**"Relayer not responding"**
-- Check relayer is running and funded
-- Verify API endpoint configuration
-
-### Getting Help
-
-- Open an issue on [GitHub](https://github.com/your-org/zert/issues)
-- Join our [Discord](https://discord.gg/zert) community
-- Read the [FAQ](./docs/FAQ.md)
-
----
-
-## License
-
-MIT License - see [LICENSE](./LICENSE) file for details.
-
----
-
-## Disclaimer
-
-This software is experimental and under active development. Use at your own risk. The protocol has not undergone a formal security audit. Do not use with significant funds until audited.
-
-Privacy is not illegal, but users are responsible for compliance with local regulations and tax reporting requirements.
-
----
-
-
-
-**Built with privacy in mind.**
-
-Contract: `6Uok9UsjztPC9VJ3a8ZpawzKmgrD2VvMKQGb64FYjhnx`  
-Network: Solana Mainnet
+**Deployed Program:** `6Uok9UsjztPC9VJ3a8ZpawzKmgrD2VvMKQGb64FYjhnx`
