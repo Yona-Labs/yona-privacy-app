@@ -2,7 +2,7 @@
 
 **Zero-Knowledge Privacy Layer for Solana**
 
-Zert is a Solana-based protocol for private DeFi using zero-knowledge proofs. It enables confidential deposits, swaps, and withdrawals of SOL and any SPL tokens while maintaining full verifiability on-chain.
+Zert is a Solana-based protocol for private DeFi using zero-knowledge proofs. It enables confidential deposits, swaps, withdrawals, and cross-chain bridges for SOL and any SPL tokens while maintaining full verifiability on-chain.
 
 Built on a sparse Merkle tree for UTXO commitments and Groth16 ZKPs for transaction validity, Zert ensures privacy without compromising security or scalability.
 
@@ -35,6 +35,19 @@ Withdraw tokens to any address through a relayer, breaking on-chain linkages bet
 - Additional signature verification of withdrawal data in the smart contract
 - No direct link between depositor and recipient
 
+### Cross-Chain Bridge (NEAR Intents)
+Private bridge to other blockchains via NEAR Intents integration. Currently supports SOL to ZEC (Zcash) swaps with full privacy.
+
+**How it works:**
+- Integrates with NEAR Intents 1Click API for cross-chain swaps
+- Shield SOL on Solana, withdraw ZEC on Zcash blockchain
+- Maintains privacy throughout the cross-chain transfer
+- No direct link between Solana deposit and Zcash withdrawal addresses
+
+**Supported routes:**
+- SOL (Solana) → ZEC (Zcash)
+- Future support for additional chains via NEAR protocol
+
 **Deployed Program:** `6Uok9UsjztPC9VJ3a8ZpawzKmgrD2VvMKQGb64FYjhnx`
 
 ---
@@ -50,11 +63,13 @@ Location: `/program/`
 - Nullifier registry for double-spend prevention
 - Groth16 proof verification via Light Protocol
 - Jupiter CPI integration for atomic swaps
+- NEAR Intents integration for cross-chain bridges
 
 **Instructions:**
 - `deposit`: Shield any SPL token into private pool
 - `withdraw`: Unshield tokens via relayer with signature verification
 - `swap`: Private atomic swaps through Jupiter aggregator
+- Bridge integration: Cross-chain transfers via NEAR Intents (SOL → ZEC)
 
 **Technical Innovation:**
 - Each UTXO internally tracks its mint type
@@ -99,6 +114,7 @@ Location: `/frontend/`
 React application with private DeFi interface:
 - Shield: Deposit any SPL token
 - Swap: Private trading via Jupiter
+- Bridge: Cross-chain transfers via NEAR Intents (SOL → ZEC)
 - Unshield: Withdraw to any address
 - Portfolio: View private balances across all tokens
 
@@ -232,6 +248,10 @@ Zert supports **any SPL token** through its unified UTXO pool architecture. Each
 
 **Additional tokens** (LSTs, launchpad tokens, etc.) can be added by creating reserve accounts in the program. All tokens share the same privacy pool, maximizing anonymity set size.
 
+**Cross-chain support:**
+- SOL can be bridged to native ZEC (Zcash blockchain) via NEAR Intents integration
+- Private cross-chain transfers with no linkage between source and destination addresses
+
 ---
 
 ## Technical Advantages
@@ -263,6 +283,14 @@ All tokens share the same UTXO set:
 - Cross-token privacy protection
 - More efficient capital utilization
 - Better privacy guarantees as protocol grows
+
+### Cross-Chain Privacy
+Private bridges to other blockchains via NEAR Intents:
+- Shield tokens on Solana, withdraw on different chains (e.g., Zcash)
+- No linkage between source and destination addresses
+- Leverages NEAR protocol for secure cross-chain messaging
+- Expands privacy beyond single blockchain limitations
+- Currently supports SOL → ZEC with more routes planned
 
 ---
 
