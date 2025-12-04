@@ -1,0 +1,21 @@
+{
+  "altAddress": "BrdQhL9oucksSyXNXnM5xdbCy5LGi2rpmpsPfDwDdKFP",
+  "programId": "6Uok9UsjztPC9VJ3a8ZpawzKmgrD2VvMKQGb64FYjhnx",
+  "globalConfig": "DnKSq7M9giqsy6VmnZS2YxfkgB6iVQZiKLhfZTAFWz1A",
+  "authority": "BySnWGpuT4KfXoeWTmraKCFitzfne4du1ZkpnTWGxTzv",
+  "feeRecipient": "BySnWGpuT4KfXoeWTmraKCFitzfne4du1ZkpnTWGxTzv",
+  "mints": {
+    "mintA": "So11111111111111111111111111111111111111112",
+    "mintB": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
+    "mintC": "A7bdiYdS5GjqGFtxf17ppRHtDKPkkRqbKtR27dxvQXaS",
+    "native": "So11111111111111111111111111111111111111112"
+  },
+  "atas": {
+    "ataA": "5oYZBDB6roJboXMt4R5uox6RsCMps6EGPFQZsW7oVY8A",
+    "ataB": "6jZ5Fm2ZJXVPzNz9dtoJnNg1r5MxpeXmjC7YbtFm8GLh",
+    "ataC": "35mmbai8PwsZBQWULZKWjXZR7imZKpaRoeR9d6C397bf",
+    "ataNative": "5oYZBDB6roJboXMt4R5uox6RsCMps6EGPFQZsW7oVY8A"
+  },
+  "totalAddresses": 19,
+  "timestamp": "2025-11-30T14:53:37.711Z"
+}

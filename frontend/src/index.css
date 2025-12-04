@@ -1,0 +1,84 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  /* UI Theme Variables */
+  /* fonts */
+  --font-sans: "Inter Variable", ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+  --font-serif: ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+
+  /* colors */
+  --color-primary: #8640ff;
+  --color-secondary: #414141;
+
+  --color-page-bg: #0F0F0F;
+  --color-primary-bg: #090909;
+  --color-primary-bg-gradient-to: #151515;
+  --color-primary-button-bg: #8D1CF2;
+  --color-primary-button-bg-gradient-to: #6B15D4;
+  --color-secondary-bg: #191919;
+
+  --color-primary-border: #3e3e3e;
+  --color-secondary-border: #282828;
+  --color-neon-border: #8D1CF21F;
+
+  --color-primary-text: white;
+  --color-primary-dark-text: black;
+  --color-secondary-text: #949494;
+  --color-tertiary-text: #635E74;
+  --color-disabled-text: #727272;
+
+  --color-accept: #00cc00;
+  --color-reject: #cc0000;
+
+  --color-disabled: #101010;
+  --color-error: #cc0000;
+  --color-success: #008800;
+  --color-warning: #cccc00;
+
+  /* spacing/sizing */
+  --spacing-fhd-screen: 1920px;
+
+  /* breakpoints */
+  --breakpoint-xs: 560px;
+}
+
+/* remove arrows from <input type="number"> */
+/* Chrome, Safari, Edge, Opera */
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+/* 
+/* Firefox */
+input[type=number] {
+  -moz-appearance: textfield;
+}
+
+/* Custom scrollbar styling for dark theme */
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: #3e3e3e transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 8px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+  border-radius: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #3e3e3e;
+  border-radius: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #4e4e4e;
+}
+
