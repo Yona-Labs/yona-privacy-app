@@ -16,8 +16,9 @@ import {
 } from '@solana/spl-token';
 import { Program, AnchorProvider, Wallet, BN } from '@coral-xyz/anchor';
 import { Config } from './config';
-import IDL from './zkcash.json';
+import IDL from './lib/idl/zkcash.json';
 import { findMerkleTreePDA, findGlobalConfigPDA, findNullifierPDAs } from './lib/derive';
+import { parseTransactionError } from './utils/errorParser';
 
 export interface WithdrawRequest {
   proof: {
@@ -309,9 +310,10 @@ export async function handleWithdraw(
 
     if (confirmation.value.err) {
       console.error('Transaction failed:', confirmation.value.err);
+      const errorMessage = parseTransactionError(confirmation.value.err);
       return {
         success: false,
-        error: `Transaction failed: ${JSON.stringify(confirmation.value.err)}`,
+        error: errorMessage,
         signature,
       };
     }
@@ -525,9 +527,10 @@ export async function handleSwap(
 
     if (confirmation.value.err) {
       console.error('Transaction failed:', confirmation.value.err);
+      const errorMessage = parseTransactionError(confirmation.value.err);
       return {
         success: false,
-        error: `Transaction failed: ${JSON.stringify(confirmation.value.err)}`,
+        error: errorMessage,
         signature,
       };
     }

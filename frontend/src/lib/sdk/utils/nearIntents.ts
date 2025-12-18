@@ -6,6 +6,8 @@
  * Note: Using mock data for offline development
  */
 
+import { formatNumber } from "@/lib/utils/formatNumber";
+
 const NEAR_INTENTS_API_BASE = "https://1click.chaindefuser.com";
 
 export interface NearIntentsToken { 
@@ -250,6 +252,6 @@ export function calculateNearIntentsExchangeRate(
   const rate = amountOut / amountIn;
   const amountOutUsd = parseFloat(quote.quote.amountOutUsd);
   
-  return `1 ${originSymbol} = ${rate.toFixed(8)} ${destinationSymbol} ($${amountOutUsd.toFixed(2)})`;
+  return `1 ${originSymbol} = ${formatNumber(rate, { maxDecimals: 8, minDecimals: 2 })} ${destinationSymbol} ($${formatNumber(amountOutUsd, { maxDecimals: 2, minDecimals: 2 })})`;
 }
 

@@ -12,6 +12,7 @@ import { getTokenInfo } from "@/lib/sdk/utils/tokenInfo";
 import { PublicKey } from "@solana/web3.js";
 import { WITHDRAW_FEE_RATE } from "@/lib/sdk/utils/constants";
 import { submitOmniDeposit } from "@/lib/sdk/utils/nearIntents";
+import { formatNumber } from "@/lib/utils/formatNumber";
 
 export function useBridgeExecute(hasher: LightWasm) {
   const { publicKey } = useWallet();
@@ -56,7 +57,7 @@ export function useBridgeExecute(hasher: LightWasm) {
     }
 
     if (parseFloat(sellingAmount) > sellingBalance) {
-      const errorMsg = `Insufficient balance. Available: ${sellingBalance.toFixed(6)}`;
+      const errorMsg = `Insufficient balance. Available: ${formatNumber(sellingBalance)}`;
       setError(errorMsg);
       toast.error(errorMsg);
       return false;

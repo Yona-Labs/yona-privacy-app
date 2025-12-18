@@ -13,6 +13,7 @@ import {
 } from "@/lib/sdk/utils/tokenInfo";
 import type { Utxo } from "@/lib/sdk/models/utxo";
 import BN from "bn.js";
+import { formatNumber } from "@/lib/utils/formatNumber";
 
 export interface TokenBalance {
   mint: string;
@@ -88,7 +89,11 @@ export function useUtxos(
           // Convert raw balance (in smallest unit) to human-readable format
           const divisor = new BN(10).pow(new BN(tokenInfo.decimals));
           const balanceNumber = rawBalance.toNumber() / divisor.toNumber();
-          const balanceString = balanceNumber.toFixed(tokenInfo.decimals);
+          const balanceString = formatNumber(balanceNumber, {
+            maxDecimals: tokenInfo.decimals,
+            minDecimals: 2,
+            removeTrailingZeros: true,
+          });
 
           tokenBalances.push({
             mint: mintAddress,

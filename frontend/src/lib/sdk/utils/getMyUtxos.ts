@@ -100,6 +100,31 @@ let roundStartIndex = 0;
 let decryptionTaskFinished = 0;
 
 /**
+ * Deduplicate UTXOs based on commitment hash
+ * @param utxos Array of UTXOs that may contain duplicates
+ * @returns Array of unique UTXOs
+ */
+async function deduplicateUtxos(utxos: Utxo[]): Promise<Utxo[]> {
+  const commitmentMap = new Map<string, Utxo>();
+  
+  for (const utxo of utxos) {
+    try {
+      const commitment = await utxo.getCommitment();
+      
+      // Only keep the first occurrence of each commitment
+      if (!commitmentMap.has(commitment)) {
+        commitmentMap.set(commitment, utxo);
+      }
+    } catch (error: any) {
+      console.error("Error getting commitment for UTXO, skipping:", error);
+      // Skip UTXOs with invalid commitments - they are likely corrupted
+    }
+  }
+  
+  return Array.from(commitmentMap.values());
+}
+
+/**
  * Fetch and decrypt all UTXOs for a user
  * @param signed The user's signature
  * @param connection Solana connection to fetch on-chain commitment accounts
@@ -187,7 +212,12 @@ export async function getMyUtxos(
       valid_strings = [...new Set(valid_strings)];
       localStorage.setItem('encryptedOutputs' + localstorageKey(signed.publicKey), JSON.stringify(valid_strings))
       setStatus?.("");
-      return valid_utxos;
+      console.log("valid_utxos before dedup:", valid_utxos.length);
+      
+      // Deduplicate UTXOs by commitment hash
+      const uniqueUtxos = await deduplicateUtxos(valid_utxos);
+      console.log("valid_utxos after dedup:", uniqueUtxos.length);
+      return uniqueUtxos;
     })();
   }
   return getMyUtxosPromise;

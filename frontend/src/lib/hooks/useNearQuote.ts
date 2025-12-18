@@ -6,7 +6,7 @@ import {
   NearIntentsQuoteResponse,
   NearIntentsQuoteRequest,
 } from "@/lib/sdk/utils/nearIntents";
-import { WITHDRAW_FEE_RATE } from "../sdk/utils/constants";
+import { WITHDRAW_FEE_RATE, SLIPPAGE_BPS } from "../sdk/utils/constants";
 import { Keypair, PublicKey } from "@solana/web3.js";
 
 /**
@@ -59,12 +59,12 @@ export function useNearIntentsQuote(
           dry: dry,
           depositMode: "SIMPLE",
           swapType: "EXACT_INPUT",
-          slippageTolerance: 100, // 1%
+          slippageTolerance: SLIPPAGE_BPS, // 0.3%
           originAsset: solToken.assetId,
           depositType: "ORIGIN_CHAIN",
           destinationAsset: zecToken.assetId,
           amount: amountInSmallestUnitWithFee,
-          recipient: destinationAddress,
+          recipient: destinationAddress, 
           recipientType: "DESTINATION_CHAIN",
           refundTo: refundAddress,
           refundType: "ORIGIN_CHAIN",
@@ -78,7 +78,7 @@ export function useNearIntentsQuote(
           dry: dry,
           depositMode: "SIMPLE",
           swapType: "EXACT_INPUT",
-          slippageTolerance: 100, // 1%
+          slippageTolerance: SLIPPAGE_BPS, // 0.3%
           originAsset: solToken.assetId,
           depositType: "ORIGIN_CHAIN",
           destinationAsset: zecToken.assetId,

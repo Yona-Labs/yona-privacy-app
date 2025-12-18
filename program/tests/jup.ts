@@ -14,7 +14,7 @@ export async function getJupiterSwapData(
     // Get quote from Jupiter
     const quoteResponse = await (
         await fetch(
-            `https://lite-api.jup.ag/swap/v1/quote?inputMint=${inputMint}&outputMint=${outputMint}&amount=${amount}&slippageBps=${slippageBps}&restrictIntermediateTokens=true`
+            `https://lite-api.jup.ag/swap/v1/quote?inputMint=${inputMint}&outputMint=${outputMint}&amount=${amount}&slippageBps=${slippageBps}&restrictIntermediateTokens=true&`
         )
     ).json();
 

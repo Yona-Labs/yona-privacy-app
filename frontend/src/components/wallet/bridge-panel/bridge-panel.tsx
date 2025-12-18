@@ -103,10 +103,9 @@ export const BridgePanel = ({ hasher }: { hasher: LightWasm }) => {
   const [destinationNetwork, setDestinationNetwork] = useState<string>("zcash");
   const [refundNetwork, setRefundNetwork] = useState<string>("zcash");
   const [slippageBps] = useState(100);
-  const [destinationAddress, setDestinationAddress] = useState("t1dai5eUZ1G1pVimLwKwj2pekHY2W2vfp6Z");
+  const [destinationAddress, setDestinationAddress] = useState("");
   const [refundAddress, setRefundAddress] = useState("");
 
-  // Debounce selling amount changes
   useEffect(() => {
     const timer = setTimeout(() => {
       setSellingAmount(sellingAmountInput);

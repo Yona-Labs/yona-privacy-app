@@ -40,10 +40,10 @@ export function Header() {
   return (
     <header className="relative px-5">
       {/* Desktop Header */}
-      <div className={`flex items-center gap-y-4 py-4 lg:px-8 ${isMobile ? 'flex-col' : 'flex-row justify-between px-4'}`}>
+      <div className={`relative flex items-center gap-y-4 py-4 lg:px-8 ${isMobile ? 'flex-col' : 'flex-row justify-between px-4'}`}>
         <div className={`flex justify-between items-center ${isMobile ? 'w-full' : 'w-fit'}`}>
           <h1 className={`flex gap-2 items-end lg:flex-1 shrink-0 text-primary-text h-full ${isMobile ? 'justify-center' : 'justify-start'}`}>
-            <img src="icons/logo.svg" alt="Yona Zert Logo" className="h-8" />
+            <img src="icons/logo.svg" alt="Yona.cash Logo" className="h-8" />
           </h1>
           
           {/* Hamburger Menu Button - Mobile Only */}
@@ -60,8 +60,8 @@ export function Header() {
           </button>
         </div>
 
-        {/* Desktop Navigation */}
-        <nav className={`lg:flex mx-4 w-fit ${isMobile ? 'hidden' : 'block'}`}>
+        {/* Desktop Navigation - Absolutely Centered */}
+        <nav className={`${isMobile ? 'hidden' : 'absolute left-1/2 -translate-x-1/2'}`}>
           <ul className="flex justify-center gap-2">
             <NavLink to="/shield" name="Shield" icon={ShieldIcon} />
             <NavLink to="/unshield" name="Unshield" icon={UnshieldIcon} />

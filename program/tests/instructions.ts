@@ -1,7 +1,7 @@
 import * as anchor from "@coral-xyz/anchor";
 import { createAssociatedTokenAccountInstruction, getAssociatedTokenAddressSync, TOKEN_PROGRAM_ID, createTransferInstruction } from "@solana/spl-token";
 import { ComputeBudgetProgram, Keypair, LAMPORTS_PER_SOL, PublicKey, Transaction, TransactionInstruction } from "@solana/web3.js";
-import { Zert } from "../target/types/zert";
+import { Zkcash } from "../target/types/zkcash";
 import {
   findNullifierPDAs,
   findMerkleTreePDA,
@@ -90,7 +90,7 @@ export function createSwapExtDataMinified(swapData: SwapData): SwapExtDataMinifi
  * @returns Transaction instruction
  */
 export async function buildDepositInstruction(
-  program: anchor.Program<Zert>,
+  program: anchor.Program<Zkcash>,
   proof: Proof,
   extData: ExtData,
   signer: PublicKey,
@@ -154,7 +154,7 @@ export async function buildDepositInstruction(
  * @returns Transaction instruction
  */
 export async function buildWithdrawInstruction(
-  program: anchor.Program<Zert>,
+  program: anchor.Program<Zkcash>,
   proof: Proof,
   extData: ExtData,
   signer: PublicKey,
@@ -223,7 +223,7 @@ export async function buildWithdrawInstruction(
  * @returns Transaction instruction
  */
 export async function buildSwapInstruction(
-  program: anchor.Program<Zert>,
+  program: anchor.Program<Zkcash>,
   proof: Proof,
   swapData: SwapData,
   signer: PublicKey,
@@ -317,7 +317,7 @@ export async function buildSwapInstruction(
  * @returns Transaction signature
  */
 export async function executeUpdateDepositLimit(
-  program: anchor.Program<Zert>,
+  program: anchor.Program<Zkcash>,
   newLimit: anchor.BN,
   signers: anchor.web3.Keypair[],
   preInstructions?: TransactionInstruction[]
@@ -381,7 +381,7 @@ export async function buildUpdateGlobalConfigInstruction(
  * @returns Transaction signature
  */
 export async function executeUpdateGlobalConfig(
-  program: anchor.Program<Zert>,
+  program: anchor.Program<Zkcash>,
   signers: anchor.web3.Keypair[],
   depositFeeRate?: number | null,
   withdrawalFeeRate?: number | null,

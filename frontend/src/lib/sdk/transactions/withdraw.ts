@@ -33,7 +33,7 @@ import {
   findGlobalConfigPDA,
 } from "../utils/derive";
 import { Program } from "@coral-xyz/anchor";
-import { Zert } from "@/lib/sdk/idl/zert";
+import { Zkcash } from "@/lib/sdk/idl/zkcash";
 import { ExtData, ProofInput, ProofToSubmit } from "../utils/types";
 import { buildWithdrawInstruction } from "./instructions"; 
 import {
@@ -43,6 +43,7 @@ import {
 } from "@solana/spl-token";
 import { sendWithdrawToRelayer, waitForJobCompletion } from "../utils/relayer";
 import { queryRemoteTreeState, fetchMerkleProof } from "../utils/indexer";
+import { parseTransactionError } from "../utils/errorParser";
 
 
 
@@ -188,14 +189,14 @@ export async function withdrawWithRelayer(
   // Encrypt outputs
   setStatus?.("Encrypting outputs...");
   const encryptedOutput = encryptionService.encryptUtxos(outputs);
-
+  const feeRecipientTokenAccount = getAssociatedTokenAddressSync(new PublicKey(mintAddress), FEE_RECIPIENT, true)
   // Prepare ExtData
   const extData: ExtData = {
     recipient: recipient_address,
     extAmount: new BN(extAmount),
     encryptedOutput: Buffer.from(encryptedOutput),
     fee: new BN(fee_amount_in_lamports),
-    feeRecipient: FEE_RECIPIENT,
+    feeRecipient: feeRecipientTokenAccount,
     mintAddressA: new PublicKey(mintAddress),
     mintAddressB: new PublicKey(mintAddress),
   };
@@ -268,7 +269,7 @@ export async function withdrawWithRelayer(
     },
     encryptedOutput: Array.from(encryptedOutput), 
     recipient: recipient_address.toString(),
-    feeRecipient: FEE_RECIPIENT.toString(),
+    feeRecipient: feeRecipientTokenAccount.toString(),
     inputMint: mintAddress,
   };
 
@@ -302,9 +303,9 @@ export async function withdrawWithRelayer(
   }
 
   if (jobResult.status === "failed" || !jobResult.result?.success) {
-    throw new Error(
-      jobResult.result?.error || jobResult.error || "Withdrawal failed"
-    );
+    const errorMsg = jobResult.result?.error || jobResult.error || "Withdrawal failed";
+    // Error message is already parsed by relayer, but we keep parseTransactionError just in case
+    throw new Error(errorMsg);
   }
 
   console.log("Withdrawal completed successfully!");
@@ -315,7 +316,7 @@ export async function withdrawWithRelayer(
 
   // Wait for confirmation
   setStatus?.("Waiting for blockchain confirmation...");
-  await new Promise((resolve) => setTimeout(resolve, 5000));
+  await new Promise((resolve) => setTimeout(resolve, 500));
 
   return {
     isPartial,

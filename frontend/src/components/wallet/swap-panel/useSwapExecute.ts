@@ -11,6 +11,7 @@ import { getAccountSign } from "@/lib/sdk/utils/getAccountSign";
 import { LightWasm } from "@lightprotocol/hasher.rs";
 import { JupiterQuoteResponse } from "@/lib/sdk/utils/jupiter";
 import { getTokenInfo } from "@/lib/sdk/utils/tokenInfo";
+import { formatNumber } from "@/lib/utils/formatNumber";
 
 export function useSwapExecute(hasher: LightWasm) {
   const { publicKey } = useWallet();
@@ -67,7 +68,7 @@ export function useSwapExecute(hasher: LightWasm) {
     }
 
     if (parseFloat(sellingAmount) > sellingBalance) {
-      const errorMsg = `Insufficient balance. Available: ${sellingBalance.toFixed(6)}`;
+      const errorMsg = `Insufficient balance. Available: ${formatNumber(sellingBalance)}`;
       setError(errorMsg);
       toast.error(errorMsg);
       return false;

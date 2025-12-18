@@ -1,10 +1,10 @@
 {
   "address": "6Uok9UsjztPC9VJ3a8ZpawzKmgrD2VvMKQGb64FYjhnx",
   "metadata": {
-    "name": "zert",
+    "name": "zkcash",
     "version": "0.1.0",
     "spec": "0.1.0",
-    "description": "Anchor program for zert"
+    "description": "Anchor program for zkcash"
   },
   "instructions": [
     {
@@ -761,7 +761,8 @@
           }
         },
         {
-          "name": "fee_recipient_account"
+          "name": "fee_recipient_account",
+          "writable": true
         },
         {
           "name": "jupiter_program",
@@ -1368,6 +1369,21 @@
       "code": 6018,
       "name": "DualTokenNotSupported",
       "msg": "Dual-token transactions are not yet supported"
+    },
+    {
+      "code": 6019,
+      "name": "InvalidJupiterSwapData",
+      "msg": "Invalid Jupiter swap data"
+    },
+    {
+      "code": 6020,
+      "name": "MathOverflow",
+      "msg": "Math overflow or underflow occurred"
+    },
+    {
+      "code": 6021,
+      "name": "InsufficientSwapOutput",
+      "msg": "Insufficient swap output: received amount is less than minimum required"
     }
   ],
   "types": [

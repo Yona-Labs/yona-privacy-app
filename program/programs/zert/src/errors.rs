@@ -65,4 +65,10 @@ pub enum ErrorCode {
     UnsupportedMintAddress,
     #[msg("Dual-token transactions are not yet supported")]
     DualTokenNotSupported,
+    #[msg("Invalid Jupiter swap data")]
+    InvalidJupiterSwapData,
+    #[msg("Math overflow or underflow occurred")]
+    MathOverflow,
+    #[msg("Insufficient swap output: received amount is less than minimum required")]
+    InsufficientSwapOutput,
 } 

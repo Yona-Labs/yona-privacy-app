@@ -1,16 +1,10 @@
-/**
- * Program IDL in camelCase format in order to be used in JS/TS.
- *
- * Note that this is only a type helper and is not the actual IDL. The original
- * IDL can be found at `target/idl/zkcash.json`.
- */
-export type Zert = {
+{
   "address": "6Uok9UsjztPC9VJ3a8ZpawzKmgrD2VvMKQGb64FYjhnx",
   "metadata": {
-    "name": "zert",
+    "name": "zkcash",
     "version": "0.1.0",
     "spec": "0.1.0",
-    "description": "Anchor program for zert"
+    "description": "Anchor program for zkcash"
   },
   "instructions": [
     {
@@ -27,7 +21,7 @@ export type Zert = {
       ],
       "accounts": [
         {
-          "name": "treeAccount",
+          "name": "tree_account",
           "writable": true,
           "pda": {
             "seeds": [
@@ -115,7 +109,7 @@ export type Zert = {
           }
         },
         {
-          "name": "globalConfig",
+          "name": "global_config",
           "pda": {
             "seeds": [
               {
@@ -140,16 +134,16 @@ export type Zert = {
           }
         },
         {
-          "name": "inputMint"
+          "name": "input_mint"
         },
         {
-          "name": "reserveTokenAccount",
+          "name": "reserve_token_account",
           "writable": true,
           "pda": {
             "seeds": [
               {
                 "kind": "account",
-                "path": "globalConfig"
+                "path": "global_config"
               },
               {
                 "kind": "const",
@@ -190,7 +184,7 @@ export type Zert = {
               },
               {
                 "kind": "account",
-                "path": "inputMint"
+                "path": "input_mint"
               }
             ],
             "program": {
@@ -233,10 +227,10 @@ export type Zert = {
           }
         },
         {
-          "name": "feeRecipientAccount"
+          "name": "fee_recipient_account"
         },
         {
-          "name": "userTokenAccount",
+          "name": "user_token_account",
           "writable": true,
           "pda": {
             "seeds": [
@@ -283,7 +277,7 @@ export type Zert = {
               },
               {
                 "kind": "account",
-                "path": "inputMint"
+                "path": "input_mint"
               }
             ],
             "program": {
@@ -331,11 +325,11 @@ export type Zert = {
           "signer": true
         },
         {
-          "name": "systemProgram",
+          "name": "system_program",
           "address": "11111111111111111111111111111111"
         },
         {
-          "name": "tokenProgram",
+          "name": "token_program",
           "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
         }
       ],
@@ -344,20 +338,20 @@ export type Zert = {
           "name": "proof",
           "type": {
             "defined": {
-              "name": "proof"
+              "name": "Proof"
             }
           }
         },
         {
-          "name": "extDataMinified",
+          "name": "ext_data_minified",
           "type": {
             "defined": {
-              "name": "extDataMinified"
+              "name": "ExtDataMinified"
             }
           }
         },
         {
-          "name": "encryptedOutput",
+          "name": "encrypted_output",
           "type": "bytes"
         }
       ]
@@ -376,7 +370,7 @@ export type Zert = {
       ],
       "accounts": [
         {
-          "name": "treeAccount",
+          "name": "tree_account",
           "writable": true,
           "pda": {
             "seeds": [
@@ -400,7 +394,7 @@ export type Zert = {
           }
         },
         {
-          "name": "treeTokenAccount",
+          "name": "tree_token_account",
           "writable": true,
           "pda": {
             "seeds": [
@@ -423,7 +417,7 @@ export type Zert = {
           }
         },
         {
-          "name": "globalConfig",
+          "name": "global_config",
           "writable": true,
           "pda": {
             "seeds": [
@@ -454,7 +448,7 @@ export type Zert = {
           "signer": true
         },
         {
-          "name": "systemProgram",
+          "name": "system_program",
           "address": "11111111111111111111111111111111"
         }
       ],
@@ -474,7 +468,7 @@ export type Zert = {
       ],
       "accounts": [
         {
-          "name": "treeAccount",
+          "name": "tree_account",
           "writable": true,
           "pda": {
             "seeds": [
@@ -556,7 +550,7 @@ export type Zert = {
           }
         },
         {
-          "name": "globalConfig",
+          "name": "global_config",
           "pda": {
             "seeds": [
               {
@@ -581,19 +575,19 @@ export type Zert = {
           }
         },
         {
-          "name": "inputMint"
+          "name": "input_mint"
         },
         {
-          "name": "outputMint"
+          "name": "output_mint"
         },
         {
-          "name": "reserveTokenAccountInput",
+          "name": "reserve_token_account_input",
           "writable": true,
           "pda": {
             "seeds": [
               {
                 "kind": "account",
-                "path": "globalConfig"
+                "path": "global_config"
               },
               {
                 "kind": "const",
@@ -634,7 +628,7 @@ export type Zert = {
               },
               {
                 "kind": "account",
-                "path": "inputMint"
+                "path": "input_mint"
               }
             ],
             "program": {
@@ -677,13 +671,13 @@ export type Zert = {
           }
         },
         {
-          "name": "reserveTokenAccountOutput",
+          "name": "reserve_token_account_output",
           "writable": true,
           "pda": {
             "seeds": [
               {
                 "kind": "account",
-                "path": "globalConfig"
+                "path": "global_config"
               },
               {
                 "kind": "const",
@@ -724,7 +718,7 @@ export type Zert = {
               },
               {
                 "kind": "account",
-                "path": "outputMint"
+                "path": "output_mint"
               }
             ],
             "program": {
@@ -767,10 +761,11 @@ export type Zert = {
           }
         },
         {
-          "name": "feeRecipientAccount"
+          "name": "fee_recipient_account",
+          "writable": true
         },
         {
-          "name": "jupiterProgram",
+          "name": "jupiter_program",
           "docs": [
             "Jupiter aggregator program"
           ]
@@ -781,11 +776,11 @@ export type Zert = {
           "signer": true
         },
         {
-          "name": "systemProgram",
+          "name": "system_program",
           "address": "11111111111111111111111111111111"
         },
         {
-          "name": "tokenProgram",
+          "name": "token_program",
           "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
         }
       ],
@@ -794,30 +789,30 @@ export type Zert = {
           "name": "proof",
           "type": {
             "defined": {
-              "name": "proof"
+              "name": "Proof"
             }
           }
         },
         {
-          "name": "extDataMinified",
+          "name": "ext_data_minified",
           "type": {
             "defined": {
-              "name": "swapExtDataMinified"
+              "name": "SwapExtDataMinified"
             }
           }
         },
         {
-          "name": "encryptedOutput",
+          "name": "encrypted_output",
           "type": "bytes"
         },
         {
-          "name": "jupiterSwapData",
+          "name": "jupiter_swap_data",
           "type": "bytes"
         }
       ]
     },
     {
-      "name": "updateDepositLimit",
+      "name": "update_deposit_limit",
       "discriminator": [
         181,
         115,
@@ -830,7 +825,7 @@ export type Zert = {
       ],
       "accounts": [
         {
-          "name": "treeAccount",
+          "name": "tree_account",
           "writable": true,
           "pda": {
             "seeds": [
@@ -860,19 +855,19 @@ export type Zert = {
           ],
           "signer": true,
           "relations": [
-            "treeAccount"
+            "tree_account"
           ]
         }
       ],
       "args": [
         {
-          "name": "newLimit",
+          "name": "new_limit",
           "type": "u64"
         }
       ]
     },
     {
-      "name": "updateGlobalConfig",
+      "name": "update_global_config",
       "discriminator": [
         164,
         84,
@@ -885,7 +880,7 @@ export type Zert = {
       ],
       "accounts": [
         {
-          "name": "globalConfig",
+          "name": "global_config",
           "writable": true,
           "pda": {
             "seeds": [
@@ -917,25 +912,25 @@ export type Zert = {
           ],
           "signer": true,
           "relations": [
-            "globalConfig"
+            "global_config"
           ]
         }
       ],
       "args": [
         {
-          "name": "depositFeeRate",
+          "name": "deposit_fee_rate",
           "type": {
             "option": "u16"
           }
         },
         {
-          "name": "withdrawalFeeRate",
+          "name": "withdrawal_fee_rate",
           "type": {
             "option": "u16"
           }
         },
         {
-          "name": "feeErrorMargin",
+          "name": "fee_error_margin",
           "type": {
             "option": "u16"
           }
@@ -956,7 +951,7 @@ export type Zert = {
       ],
       "accounts": [
         {
-          "name": "treeAccount",
+          "name": "tree_account",
           "writable": true,
           "pda": {
             "seeds": [
@@ -1044,7 +1039,7 @@ export type Zert = {
           }
         },
         {
-          "name": "globalConfig",
+          "name": "global_config",
           "pda": {
             "seeds": [
               {
@@ -1069,16 +1064,16 @@ export type Zert = {
           }
         },
         {
-          "name": "inputMint"
+          "name": "input_mint"
         },
         {
-          "name": "reserveTokenAccount",
+          "name": "reserve_token_account",
           "writable": true,
           "pda": {
             "seeds": [
               {
                 "kind": "account",
-                "path": "globalConfig"
+                "path": "global_config"
               },
               {
                 "kind": "const",
@@ -1119,7 +1114,7 @@ export type Zert = {
               },
               {
                 "kind": "account",
-                "path": "inputMint"
+                "path": "input_mint"
               }
             ],
             "program": {
@@ -1166,11 +1161,11 @@ export type Zert = {
           "writable": true
         },
         {
-          "name": "recipientTokenAccount",
+          "name": "recipient_token_account",
           "writable": true
         },
         {
-          "name": "feeRecipientAccount"
+          "name": "fee_recipient_account"
         },
         {
           "name": "relayer",
@@ -1178,11 +1173,11 @@ export type Zert = {
           "signer": true
         },
         {
-          "name": "systemProgram",
+          "name": "system_program",
           "address": "11111111111111111111111111111111"
         },
         {
-          "name": "tokenProgram",
+          "name": "token_program",
           "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
         }
       ],
@@ -1191,20 +1186,20 @@ export type Zert = {
           "name": "proof",
           "type": {
             "defined": {
-              "name": "proof"
+              "name": "Proof"
             }
           }
         },
         {
-          "name": "extDataMinified",
+          "name": "ext_data_minified",
           "type": {
             "defined": {
-              "name": "extDataMinified"
+              "name": "ExtDataMinified"
             }
           }
         },
         {
-          "name": "encryptedOutput",
+          "name": "encrypted_output",
           "type": "bytes"
         }
       ]
@@ -1212,7 +1207,7 @@ export type Zert = {
   ],
   "accounts": [
     {
-      "name": "globalConfig",
+      "name": "GlobalConfig",
       "discriminator": [
         149,
         8,
@@ -1225,7 +1220,7 @@ export type Zert = {
       ]
     },
     {
-      "name": "merkleTreeAccount",
+      "name": "MerkleTreeAccount",
       "discriminator": [
         147,
         200,
@@ -1238,7 +1233,7 @@ export type Zert = {
       ]
     },
     {
-      "name": "nullifierAccount",
+      "name": "NullifierAccount",
       "discriminator": [
         250,
         31,
@@ -1251,7 +1246,7 @@ export type Zert = {
       ]
     },
     {
-      "name": "treeTokenAccount",
+      "name": "TreeTokenAccount",
       "discriminator": [
         153,
         63,
@@ -1266,7 +1261,7 @@ export type Zert = {
   ],
   "events": [
     {
-      "name": "commitmentData",
+      "name": "CommitmentData",
       "discriminator": [
         13,
         110,
@@ -1282,103 +1277,118 @@ export type Zert = {
   "errors": [
     {
       "code": 6000,
-      "name": "unauthorized",
+      "name": "Unauthorized",
       "msg": "Not authorized to perform this action"
     },
     {
       "code": 6001,
-      "name": "extDataHashMismatch",
+      "name": "ExtDataHashMismatch",
       "msg": "External data hash does not match the one in the proof"
     },
     {
       "code": 6002,
-      "name": "unknownRoot",
+      "name": "UnknownRoot",
       "msg": "Root is not known in the tree"
     },
     {
       "code": 6003,
-      "name": "invalidPublicAmountData",
+      "name": "InvalidPublicAmountData",
       "msg": "Public amount is invalid"
     },
     {
       "code": 6004,
-      "name": "insufficientFundsForWithdrawal",
+      "name": "InsufficientFundsForWithdrawal",
       "msg": "Insufficient funds for withdrawal"
     },
     {
       "code": 6005,
-      "name": "insufficientFundsForFee",
+      "name": "InsufficientFundsForFee",
       "msg": "Insufficient funds for fee"
     },
     {
       "code": 6006,
-      "name": "invalidProof",
+      "name": "InvalidProof",
       "msg": "Proof is invalid"
     },
     {
       "code": 6007,
-      "name": "invalidFee",
+      "name": "InvalidFee",
       "msg": "Invalid fee: fee must be less than MAX_ALLOWED_VAL (2^248)."
     },
     {
       "code": 6008,
-      "name": "invalidExtAmount",
+      "name": "InvalidExtAmount",
       "msg": "Invalid ext amount: absolute ext_amount must be less than MAX_ALLOWED_VAL (2^248)."
     },
     {
       "code": 6009,
-      "name": "publicAmountCalculationError",
+      "name": "PublicAmountCalculationError",
       "msg": "Public amount calculation resulted in an overflow/underflow."
     },
     {
       "code": 6010,
-      "name": "arithmeticOverflow",
+      "name": "ArithmeticOverflow",
       "msg": "Arithmetic overflow/underflow occurred"
     },
     {
       "code": 6011,
-      "name": "depositLimitExceeded",
+      "name": "DepositLimitExceeded",
       "msg": "Deposit limit exceeded"
     },
     {
       "code": 6012,
-      "name": "invalidFeeRate",
+      "name": "InvalidFeeRate",
       "msg": "Invalid fee rate: must be between 0 and 10000 basis points"
     },
     {
       "code": 6013,
-      "name": "invalidFeeRecipient",
+      "name": "InvalidFeeRecipient",
       "msg": "Fee recipient does not match global configuration"
     },
     {
       "code": 6014,
-      "name": "invalidFeeAmount",
+      "name": "InvalidFeeAmount",
       "msg": "Fee amount is below minimum required (must be at least (1 - fee_error_margin) * expected_fee)"
     },
     {
       "code": 6015,
-      "name": "recipientMismatch",
+      "name": "RecipientMismatch",
       "msg": "Recipient account does not match the ExtData recipient"
     },
     {
       "code": 6016,
-      "name": "merkleTreeFull",
+      "name": "MerkleTreeFull",
       "msg": "Merkle tree is full: cannot add more leaves"
     },
     {
       "code": 6017,
-      "name": "unsupportedMintAddress",
+      "name": "UnsupportedMintAddress",
       "msg": "Unsupported mint address"
     },
     {
       "code": 6018,
-      "name": "dualTokenNotSupported",
+      "name": "DualTokenNotSupported",
       "msg": "Dual-token transactions are not yet supported"
+    },
+    {
+      "code": 6019,
+      "name": "InvalidJupiterSwapData",
+      "msg": "Invalid Jupiter swap data"
+    },
+    {
+      "code": 6020,
+      "name": "MathOverflow",
+      "msg": "Math overflow or underflow occurred"
+    },
+    {
+      "code": 6021,
+      "name": "InsufficientSwapOutput",
+      "msg": "Insufficient swap output: received amount is less than minimum required"
     }
   ],
   "types": [
     {
-      "name": "commitmentData",
+      "name": "CommitmentData",
       "type": {
         "kind": "struct",
         "fields": [
@@ -1405,19 +1415,19 @@ export type Zert = {
             }
           },
           {
-            "name": "encryptedOutput",
+            "name": "encrypted_output",
             "type": "bytes"
           }
         ]
       }
     },
     {
-      "name": "extDataMinified",
+      "name": "ExtDataMinified",
       "type": {
         "kind": "struct",
         "fields": [
           {
-            "name": "extAmount",
+            "name": "ext_amount",
             "type": "i64"
           },
           {
@@ -1428,7 +1438,7 @@ export type Zert = {
       }
     },
     {
-      "name": "globalConfig",
+      "name": "GlobalConfig",
       "type": {
         "kind": "struct",
         "fields": [
@@ -1437,15 +1447,15 @@ export type Zert = {
             "type": "pubkey"
           },
           {
-            "name": "depositFeeRate",
+            "name": "deposit_fee_rate",
             "type": "u16"
           },
           {
-            "name": "withdrawalFeeRate",
+            "name": "withdrawal_fee_rate",
             "type": "u16"
           },
           {
-            "name": "feeErrorMargin",
+            "name": "fee_error_margin",
             "type": "u16"
           },
           {
@@ -1456,7 +1466,7 @@ export type Zert = {
       }
     },
     {
-      "name": "merkleTreeAccount",
+      "name": "MerkleTreeAccount",
       "serialization": "bytemuck",
       "repr": {
         "kind": "c"
@@ -1469,7 +1479,7 @@ export type Zert = {
             "type": "pubkey"
           },
           {
-            "name": "nextIndex",
+            "name": "next_index",
             "type": "u64"
           },
           {
@@ -1496,7 +1506,7 @@ export type Zert = {
             }
           },
           {
-            "name": "rootHistory",
+            "name": "root_history",
             "type": {
               "array": [
                 {
@@ -1510,11 +1520,11 @@ export type Zert = {
             }
           },
           {
-            "name": "rootIndex",
+            "name": "root_index",
             "type": "u64"
           },
           {
-            "name": "maxDepositAmount",
+            "name": "max_deposit_amount",
             "type": "u64"
           },
           {
@@ -1522,7 +1532,7 @@ export type Zert = {
             "type": "u8"
           },
           {
-            "name": "rootHistorySize",
+            "name": "root_history_size",
             "type": "u8"
           },
           {
@@ -1530,7 +1540,7 @@ export type Zert = {
             "type": "u8"
           },
           {
-            "name": "padding",
+            "name": "_padding",
             "type": {
               "array": [
                 "u8",
@@ -1542,7 +1552,7 @@ export type Zert = {
       }
     },
     {
-      "name": "nullifierAccount",
+      "name": "NullifierAccount",
       "type": {
         "kind": "struct",
         "fields": [
@@ -1558,12 +1568,12 @@ export type Zert = {
       }
     },
     {
-      "name": "proof",
+      "name": "Proof",
       "type": {
         "kind": "struct",
         "fields": [
           {
-            "name": "proofA",
+            "name": "proof_a",
             "type": {
               "array": [
                 "u8",
@@ -1572,7 +1582,7 @@ export type Zert = {
             }
           },
           {
-            "name": "proofB",
+            "name": "proof_b",
             "type": {
               "array": [
                 "u8",
@@ -1581,7 +1591,7 @@ export type Zert = {
             }
           },
           {
-            "name": "proofC",
+            "name": "proof_c",
             "type": {
               "array": [
                 "u8",
@@ -1599,7 +1609,7 @@ export type Zert = {
             }
           },
           {
-            "name": "publicAmount0",
+            "name": "public_amount0",
             "type": {
               "array": [
                 "u8",
@@ -1608,7 +1618,7 @@ export type Zert = {
             }
           },
           {
-            "name": "publicAmount1",
+            "name": "public_amount1",
             "type": {
               "array": [
                 "u8",
@@ -1617,7 +1627,7 @@ export type Zert = {
             }
           },
           {
-            "name": "extDataHash",
+            "name": "ext_data_hash",
             "type": {
               "array": [
                 "u8",
@@ -1626,7 +1636,7 @@ export type Zert = {
             }
           },
           {
-            "name": "inputNullifiers",
+            "name": "input_nullifiers",
             "type": {
               "array": [
                 {
@@ -1640,7 +1650,7 @@ export type Zert = {
             }
           },
           {
-            "name": "outputCommitments",
+            "name": "output_commitments",
             "type": {
               "array": [
                 {
@@ -1657,16 +1667,16 @@ export type Zert = {
       }
     },
     {
-      "name": "swapExtDataMinified",
+      "name": "SwapExtDataMinified",
       "type": {
         "kind": "struct",
         "fields": [
           {
-            "name": "extAmount",
+            "name": "ext_amount",
             "type": "i64"
           },
           {
-            "name": "extMinAmountOut",
+            "name": "ext_min_amount_out",
             "type": "i64"
           },
           {
@@ -1677,7 +1687,7 @@ export type Zert = {
       }
     },
     {
-      "name": "treeTokenAccount",
+      "name": "TreeTokenAccount",
       "type": {
         "kind": "struct",
         "fields": [
@@ -1693,4 +1703,4 @@ export type Zert = {
       }
     }
   ]
-};
+}

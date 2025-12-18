@@ -13,7 +13,7 @@ export default function Bridge() {
         <div>
           <div className="flex items-center gap-2 px-[34px]">
             <BridgeIcon className="h-5 w-5" />
-            <h2 className="text-xl font-bold text-primary-text">Bridge</h2>
+            <h2 className="text-xl font-bold text-primary-text">Private Bridge</h2>
           </div>
         </div>
 

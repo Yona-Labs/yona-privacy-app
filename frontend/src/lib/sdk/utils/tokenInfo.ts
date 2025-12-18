@@ -143,7 +143,24 @@ export function getTokenInfo(identifier: string | PublicKey): TokenMetadata {
 export function formatTokenAmount(amount: number | string, decimals: number): string {
   const numAmount = typeof amount === 'string' ? parseFloat(amount) : amount;
   const divisor = Math.pow(10, decimals);
-  return (numAmount / divisor).toFixed(decimals);
+  const formatted = numAmount / divisor;
+  
+  // For very small numbers, use all available decimals
+  // For larger numbers, use adaptive formatting
+  if (Math.abs(formatted) < 0.01 || Math.abs(formatted) >= 1000) {
+    return formatted.toFixed(decimals);
+  }
+  
+  // Use adaptive decimals for middle-range numbers
+  let adaptiveDecimals = decimals;
+  if (Math.abs(formatted) >= 1) {
+    adaptiveDecimals = Math.min(6, decimals);
+  } else if (Math.abs(formatted) >= 0.1) {
+    adaptiveDecimals = Math.min(8, decimals);
+  }
+  
+  // Remove trailing zeros
+  return parseFloat(formatted.toFixed(adaptiveDecimals)).toString();
 }
 
 /**

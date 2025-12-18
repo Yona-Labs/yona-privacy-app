@@ -1,4 +1,10 @@
-{
+/**
+ * Program IDL in camelCase format in order to be used in JS/TS.
+ *
+ * Note that this is only a type helper and is not the actual IDL. The original
+ * IDL can be found at `target/idl/zkcash.json`.
+ */
+export type Zkcash = {
   "address": "6Uok9UsjztPC9VJ3a8ZpawzKmgrD2VvMKQGb64FYjhnx",
   "metadata": {
     "name": "zkcash",
@@ -21,7 +27,7 @@
       ],
       "accounts": [
         {
-          "name": "tree_account",
+          "name": "treeAccount",
           "writable": true,
           "pda": {
             "seeds": [
@@ -109,7 +115,7 @@
           }
         },
         {
-          "name": "global_config",
+          "name": "globalConfig",
           "pda": {
             "seeds": [
               {
@@ -134,16 +140,16 @@
           }
         },
         {
-          "name": "input_mint"
+          "name": "inputMint"
         },
         {
-          "name": "reserve_token_account",
+          "name": "reserveTokenAccount",
           "writable": true,
           "pda": {
             "seeds": [
               {
                 "kind": "account",
-                "path": "global_config"
+                "path": "globalConfig"
               },
               {
                 "kind": "const",
@@ -184,7 +190,7 @@
               },
               {
                 "kind": "account",
-                "path": "input_mint"
+                "path": "inputMint"
               }
             ],
             "program": {
@@ -227,10 +233,10 @@
           }
         },
         {
-          "name": "fee_recipient_account"
+          "name": "feeRecipientAccount"
         },
         {
-          "name": "user_token_account",
+          "name": "userTokenAccount",
           "writable": true,
           "pda": {
             "seeds": [
@@ -277,7 +283,7 @@
               },
               {
                 "kind": "account",
-                "path": "input_mint"
+                "path": "inputMint"
               }
             ],
             "program": {
@@ -325,11 +331,11 @@
           "signer": true
         },
         {
-          "name": "system_program",
+          "name": "systemProgram",
           "address": "11111111111111111111111111111111"
         },
         {
-          "name": "token_program",
+          "name": "tokenProgram",
           "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
         }
       ],
@@ -338,20 +344,20 @@
           "name": "proof",
           "type": {
             "defined": {
-              "name": "Proof"
+              "name": "proof"
             }
           }
         },
         {
-          "name": "ext_data_minified",
+          "name": "extDataMinified",
           "type": {
             "defined": {
-              "name": "ExtDataMinified"
+              "name": "extDataMinified"
             }
           }
         },
         {
-          "name": "encrypted_output",
+          "name": "encryptedOutput",
           "type": "bytes"
         }
       ]
@@ -370,7 +376,7 @@
       ],
       "accounts": [
         {
-          "name": "tree_account",
+          "name": "treeAccount",
           "writable": true,
           "pda": {
             "seeds": [
@@ -394,7 +400,7 @@
           }
         },
         {
-          "name": "tree_token_account",
+          "name": "treeTokenAccount",
           "writable": true,
           "pda": {
             "seeds": [
@@ -417,7 +423,7 @@
           }
         },
         {
-          "name": "global_config",
+          "name": "globalConfig",
           "writable": true,
           "pda": {
             "seeds": [
@@ -448,7 +454,7 @@
           "signer": true
         },
         {
-          "name": "system_program",
+          "name": "systemProgram",
           "address": "11111111111111111111111111111111"
         }
       ],
@@ -468,7 +474,7 @@
       ],
       "accounts": [
         {
-          "name": "tree_account",
+          "name": "treeAccount",
           "writable": true,
           "pda": {
             "seeds": [
@@ -550,7 +556,7 @@
           }
         },
         {
-          "name": "global_config",
+          "name": "globalConfig",
           "pda": {
             "seeds": [
               {
@@ -575,19 +581,19 @@
           }
         },
         {
-          "name": "input_mint"
+          "name": "inputMint"
         },
         {
-          "name": "output_mint"
+          "name": "outputMint"
         },
         {
-          "name": "reserve_token_account_input",
+          "name": "reserveTokenAccountInput",
           "writable": true,
           "pda": {
             "seeds": [
               {
                 "kind": "account",
-                "path": "global_config"
+                "path": "globalConfig"
               },
               {
                 "kind": "const",
@@ -628,7 +634,7 @@
               },
               {
                 "kind": "account",
-                "path": "input_mint"
+                "path": "inputMint"
               }
             ],
             "program": {
@@ -671,13 +677,13 @@
           }
         },
         {
-          "name": "reserve_token_account_output",
+          "name": "reserveTokenAccountOutput",
           "writable": true,
           "pda": {
             "seeds": [
               {
                 "kind": "account",
-                "path": "global_config"
+                "path": "globalConfig"
               },
               {
                 "kind": "const",
@@ -718,7 +724,7 @@
               },
               {
                 "kind": "account",
-                "path": "output_mint"
+                "path": "outputMint"
               }
             ],
             "program": {
@@ -761,10 +767,11 @@
           }
         },
         {
-          "name": "fee_recipient_account"
+          "name": "feeRecipientAccount",
+          "writable": true
         },
         {
-          "name": "jupiter_program",
+          "name": "jupiterProgram",
           "docs": [
             "Jupiter aggregator program"
           ]
@@ -775,11 +782,11 @@
           "signer": true
         },
         {
-          "name": "system_program",
+          "name": "systemProgram",
           "address": "11111111111111111111111111111111"
         },
         {
-          "name": "token_program",
+          "name": "tokenProgram",
           "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
         }
       ],
@@ -788,30 +795,30 @@
           "name": "proof",
           "type": {
             "defined": {
-              "name": "Proof"
+              "name": "proof"
             }
           }
         },
         {
-          "name": "ext_data_minified",
+          "name": "extDataMinified",
           "type": {
             "defined": {
-              "name": "SwapExtDataMinified"
+              "name": "swapExtDataMinified"
             }
           }
         },
         {
-          "name": "encrypted_output",
+          "name": "encryptedOutput",
           "type": "bytes"
         },
         {
-          "name": "jupiter_swap_data",
+          "name": "jupiterSwapData",
           "type": "bytes"
         }
       ]
     },
     {
-      "name": "update_deposit_limit",
+      "name": "updateDepositLimit",
       "discriminator": [
         181,
         115,
@@ -824,7 +831,7 @@
       ],
       "accounts": [
         {
-          "name": "tree_account",
+          "name": "treeAccount",
           "writable": true,
           "pda": {
             "seeds": [
@@ -854,19 +861,19 @@
           ],
           "signer": true,
           "relations": [
-            "tree_account"
+            "treeAccount"
           ]
         }
       ],
       "args": [
         {
-          "name": "new_limit",
+          "name": "newLimit",
           "type": "u64"
         }
       ]
     },
     {
-      "name": "update_global_config",
+      "name": "updateGlobalConfig",
       "discriminator": [
         164,
         84,
@@ -879,7 +886,7 @@
       ],
       "accounts": [
         {
-          "name": "global_config",
+          "name": "globalConfig",
           "writable": true,
           "pda": {
             "seeds": [
@@ -911,25 +918,25 @@
           ],
           "signer": true,
           "relations": [
-            "global_config"
+            "globalConfig"
           ]
         }
       ],
       "args": [
         {
-          "name": "deposit_fee_rate",
+          "name": "depositFeeRate",
           "type": {
             "option": "u16"
           }
         },
         {
-          "name": "withdrawal_fee_rate",
+          "name": "withdrawalFeeRate",
           "type": {
             "option": "u16"
           }
         },
         {
-          "name": "fee_error_margin",
+          "name": "feeErrorMargin",
           "type": {
             "option": "u16"
           }
@@ -950,7 +957,7 @@
       ],
       "accounts": [
         {
-          "name": "tree_account",
+          "name": "treeAccount",
           "writable": true,
           "pda": {
             "seeds": [
@@ -1038,7 +1045,7 @@
           }
         },
         {
-          "name": "global_config",
+          "name": "globalConfig",
           "pda": {
             "seeds": [
               {
@@ -1063,16 +1070,16 @@
           }
         },
         {
-          "name": "input_mint"
+          "name": "inputMint"
         },
         {
-          "name": "reserve_token_account",
+          "name": "reserveTokenAccount",
           "writable": true,
           "pda": {
             "seeds": [
               {
                 "kind": "account",
-                "path": "global_config"
+                "path": "globalConfig"
               },
               {
                 "kind": "const",
@@ -1113,7 +1120,7 @@
               },
               {
                 "kind": "account",
-                "path": "input_mint"
+                "path": "inputMint"
               }
             ],
             "program": {
@@ -1160,11 +1167,11 @@
           "writable": true
         },
         {
-          "name": "recipient_token_account",
+          "name": "recipientTokenAccount",
           "writable": true
         },
         {
-          "name": "fee_recipient_account"
+          "name": "feeRecipientAccount"
         },
         {
           "name": "relayer",
@@ -1172,11 +1179,11 @@
           "signer": true
         },
         {
-          "name": "system_program",
+          "name": "systemProgram",
           "address": "11111111111111111111111111111111"
         },
         {
-          "name": "token_program",
+          "name": "tokenProgram",
           "address": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
         }
       ],
@@ -1185,20 +1192,20 @@
           "name": "proof",
           "type": {
             "defined": {
-              "name": "Proof"
+              "name": "proof"
             }
           }
         },
         {
-          "name": "ext_data_minified",
+          "name": "extDataMinified",
           "type": {
             "defined": {
-              "name": "ExtDataMinified"
+              "name": "extDataMinified"
             }
           }
         },
         {
-          "name": "encrypted_output",
+          "name": "encryptedOutput",
           "type": "bytes"
         }
       ]
@@ -1206,7 +1213,7 @@
   ],
   "accounts": [
     {
-      "name": "GlobalConfig",
+      "name": "globalConfig",
       "discriminator": [
         149,
         8,
@@ -1219,7 +1226,7 @@
       ]
     },
     {
-      "name": "MerkleTreeAccount",
+      "name": "merkleTreeAccount",
       "discriminator": [
         147,
         200,
@@ -1232,7 +1239,7 @@
       ]
     },
     {
-      "name": "NullifierAccount",
+      "name": "nullifierAccount",
       "discriminator": [
         250,
         31,
@@ -1245,7 +1252,7 @@
       ]
     },
     {
-      "name": "TreeTokenAccount",
+      "name": "treeTokenAccount",
       "discriminator": [
         153,
         63,
@@ -1260,7 +1267,7 @@
   ],
   "events": [
     {
-      "name": "CommitmentData",
+      "name": "commitmentData",
       "discriminator": [
         13,
         110,
@@ -1276,103 +1283,118 @@
   "errors": [
     {
       "code": 6000,
-      "name": "Unauthorized",
+      "name": "unauthorized",
       "msg": "Not authorized to perform this action"
     },
     {
       "code": 6001,
-      "name": "ExtDataHashMismatch",
+      "name": "extDataHashMismatch",
       "msg": "External data hash does not match the one in the proof"
     },
     {
       "code": 6002,
-      "name": "UnknownRoot",
+      "name": "unknownRoot",
       "msg": "Root is not known in the tree"
     },
     {
       "code": 6003,
-      "name": "InvalidPublicAmountData",
+      "name": "invalidPublicAmountData",
       "msg": "Public amount is invalid"
     },
     {
       "code": 6004,
-      "name": "InsufficientFundsForWithdrawal",
+      "name": "insufficientFundsForWithdrawal",
       "msg": "Insufficient funds for withdrawal"
     },
     {
       "code": 6005,
-      "name": "InsufficientFundsForFee",
+      "name": "insufficientFundsForFee",
       "msg": "Insufficient funds for fee"
     },
     {
       "code": 6006,
-      "name": "InvalidProof",
+      "name": "invalidProof",
       "msg": "Proof is invalid"
     },
     {
       "code": 6007,
-      "name": "InvalidFee",
+      "name": "invalidFee",
       "msg": "Invalid fee: fee must be less than MAX_ALLOWED_VAL (2^248)."
     },
     {
       "code": 6008,
-      "name": "InvalidExtAmount",
+      "name": "invalidExtAmount",
       "msg": "Invalid ext amount: absolute ext_amount must be less than MAX_ALLOWED_VAL (2^248)."
     },
     {
       "code": 6009,
-      "name": "PublicAmountCalculationError",
+      "name": "publicAmountCalculationError",
       "msg": "Public amount calculation resulted in an overflow/underflow."
     },
     {
       "code": 6010,
-      "name": "ArithmeticOverflow",
+      "name": "arithmeticOverflow",
       "msg": "Arithmetic overflow/underflow occurred"
     },
     {
       "code": 6011,
-      "name": "DepositLimitExceeded",
+      "name": "depositLimitExceeded",
       "msg": "Deposit limit exceeded"
     },
     {
       "code": 6012,
-      "name": "InvalidFeeRate",
+      "name": "invalidFeeRate",
       "msg": "Invalid fee rate: must be between 0 and 10000 basis points"
     },
     {
       "code": 6013,
-      "name": "InvalidFeeRecipient",
+      "name": "invalidFeeRecipient",
       "msg": "Fee recipient does not match global configuration"
     },
     {
       "code": 6014,
-      "name": "InvalidFeeAmount",
+      "name": "invalidFeeAmount",
       "msg": "Fee amount is below minimum required (must be at least (1 - fee_error_margin) * expected_fee)"
     },
     {
       "code": 6015,
-      "name": "RecipientMismatch",
+      "name": "recipientMismatch",
       "msg": "Recipient account does not match the ExtData recipient"
     },
     {
       "code": 6016,
-      "name": "MerkleTreeFull",
+      "name": "merkleTreeFull",
       "msg": "Merkle tree is full: cannot add more leaves"
     },
     {
       "code": 6017,
-      "name": "UnsupportedMintAddress",
+      "name": "unsupportedMintAddress",
       "msg": "Unsupported mint address"
     },
     {
       "code": 6018,
-      "name": "DualTokenNotSupported",
+      "name": "dualTokenNotSupported",
       "msg": "Dual-token transactions are not yet supported"
+    },
+    {
+      "code": 6019,
+      "name": "invalidJupiterSwapData",
+      "msg": "Invalid Jupiter swap data"
+    },
+    {
+      "code": 6020,
+      "name": "mathOverflow",
+      "msg": "Math overflow or underflow occurred"
+    },
+    {
+      "code": 6021,
+      "name": "insufficientSwapOutput",
+      "msg": "Insufficient swap output: received amount is less than minimum required"
     }
   ],
   "types": [
     {
-      "name": "CommitmentData",
+      "name": "commitmentData",
       "type": {
         "kind": "struct",
         "fields": [
@@ -1399,19 +1421,19 @@
             }
           },
           {
-            "name": "encrypted_output",
+            "name": "encryptedOutput",
             "type": "bytes"
           }
         ]
       }
     },
     {
-      "name": "ExtDataMinified",
+      "name": "extDataMinified",
       "type": {
         "kind": "struct",
         "fields": [
           {
-            "name": "ext_amount",
+            "name": "extAmount",
             "type": "i64"
           },
           {
@@ -1422,7 +1444,7 @@
       }
     },
     {
-      "name": "GlobalConfig",
+      "name": "globalConfig",
       "type": {
         "kind": "struct",
         "fields": [
@@ -1431,15 +1453,15 @@
             "type": "pubkey"
           },
           {
-            "name": "deposit_fee_rate",
+            "name": "depositFeeRate",
             "type": "u16"
           },
           {
-            "name": "withdrawal_fee_rate",
+            "name": "withdrawalFeeRate",
             "type": "u16"
           },
           {
-            "name": "fee_error_margin",
+            "name": "feeErrorMargin",
             "type": "u16"
           },
           {
@@ -1450,7 +1472,7 @@
       }
     },
     {
-      "name": "MerkleTreeAccount",
+      "name": "merkleTreeAccount",
       "serialization": "bytemuck",
       "repr": {
         "kind": "c"
@@ -1463,7 +1485,7 @@
             "type": "pubkey"
           },
           {
-            "name": "next_index",
+            "name": "nextIndex",
             "type": "u64"
           },
           {
@@ -1490,7 +1512,7 @@
             }
           },
           {
-            "name": "root_history",
+            "name": "rootHistory",
             "type": {
               "array": [
                 {
@@ -1504,11 +1526,11 @@
             }
           },
           {
-            "name": "root_index",
+            "name": "rootIndex",
             "type": "u64"
           },
           {
-            "name": "max_deposit_amount",
+            "name": "maxDepositAmount",
             "type": "u64"
           },
           {
@@ -1516,7 +1538,7 @@
             "type": "u8"
           },
           {
-            "name": "root_history_size",
+            "name": "rootHistorySize",
             "type": "u8"
           },
           {
@@ -1524,7 +1546,7 @@
             "type": "u8"
           },
           {
-            "name": "_padding",
+            "name": "padding",
             "type": {
               "array": [
                 "u8",
@@ -1536,7 +1558,7 @@
       }
     },
     {
-      "name": "NullifierAccount",
+      "name": "nullifierAccount",
       "type": {
         "kind": "struct",
         "fields": [
@@ -1552,12 +1574,12 @@
       }
     },
     {
-      "name": "Proof",
+      "name": "proof",
       "type": {
         "kind": "struct",
         "fields": [
           {
-            "name": "proof_a",
+            "name": "proofA",
             "type": {
               "array": [
                 "u8",
@@ -1566,7 +1588,7 @@
             }
           },
           {
-            "name": "proof_b",
+            "name": "proofB",
             "type": {
               "array": [
                 "u8",
@@ -1575,7 +1597,7 @@
             }
           },
           {
-            "name": "proof_c",
+            "name": "proofC",
             "type": {
               "array": [
                 "u8",
@@ -1593,7 +1615,7 @@
             }
           },
           {
-            "name": "public_amount0",
+            "name": "publicAmount0",
             "type": {
               "array": [
                 "u8",
@@ -1602,7 +1624,7 @@
             }
           },
           {
-            "name": "public_amount1",
+            "name": "publicAmount1",
             "type": {
               "array": [
                 "u8",
@@ -1611,7 +1633,7 @@
             }
           },
           {
-            "name": "ext_data_hash",
+            "name": "extDataHash",
             "type": {
               "array": [
                 "u8",
@@ -1620,7 +1642,7 @@
             }
           },
           {
-            "name": "input_nullifiers",
+            "name": "inputNullifiers",
             "type": {
               "array": [
                 {
@@ -1634,7 +1656,7 @@
             }
           },
           {
-            "name": "output_commitments",
+            "name": "outputCommitments",
             "type": {
               "array": [
                 {
@@ -1651,16 +1673,16 @@
       }
     },
     {
-      "name": "SwapExtDataMinified",
+      "name": "swapExtDataMinified",
       "type": {
         "kind": "struct",
         "fields": [
           {
-            "name": "ext_amount",
+            "name": "extAmount",
             "type": "i64"
           },
           {
-            "name": "ext_min_amount_out",
+            "name": "extMinAmountOut",
             "type": "i64"
           },
           {
@@ -1671,7 +1693,7 @@
       }
     },
     {
-      "name": "TreeTokenAccount",
+      "name": "treeTokenAccount",
       "type": {
         "kind": "struct",
         "fields": [
@@ -1687,4 +1709,4 @@
       }
     }
   ]
-}
+};

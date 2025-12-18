@@ -52,25 +52,23 @@ async function initializeATA() {
     console.log("📋 Program ID:", program.programId.toString());
 
     // Derive global config PDA
-    const [globalConfig] = PublicKey.findProgramAddressSync(
-      [Buffer.from("global_config")],
-      program.programId
-    );
+    const globalConfig = new PublicKey("BySnWGpuT4KfXoeWTmraKCFitzfne4du1ZkpnTWGxTzv")
     console.log("📍 Global Config PDA:", globalConfig.toString());
 
     // Check if global config is initialized
-    try {
-      await program.account.globalConfig.fetch(globalConfig);
-    } catch (e) {
-      console.error("❌ Global config not initialized. Please run 'yarn cli:init' first");
-      process.exit(1);
-    }
+    // try {
+    //   await program.account.globalConfig.fetch(globalConfig);
+    // } catch (e) {
+    //   console.error("❌ Global config not initialized. Please run 'yarn cli:init' first");
+    //   process.exit(1);
+    // }
 
     // Load mints from array
     const mintsData = [
-      NATIVE_MINT,
+      "he1iusmfkpAdwvxLNGV8Y1iSbj4rUy6yMhEA3fotn9A",
+      "So11111111111111111111111111111111111111112",
       "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
-      "A7bdiYdS5GjqGFtxf17ppRHtDKPkkRqbKtR27dxvQXaS",
+      "A7bdiYdS5GjqGFtxf17ppRHtDKPkkRqbKtR27dxvQXaS"
     ];
 
 

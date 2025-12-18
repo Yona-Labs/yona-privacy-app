@@ -1,0 +1,136 @@
+---
+title: "What is Yona?"
+description: "We enable private trustless DeFi on Solana."
+---
+
+
+Yona is a privacy protocol on Solana that lets you shield SOL and any SPL token into our privacy pool and trade any pair privately on Jupiter. 
+Any action done through our protocol is fully untraceable by any external observer. 
+They will see that the Jupiter swap happened, but they will not know who executed the trade.
+
+ 
+Using zero-knowledge proofs, you can prove a transaction is valid without exposing amounts or participants.
+It only relies on ZK cryptography, no trusted parties, no questionable TEEs.
+<CardGroup cols={2}>
+  <Card
+    title="Get Started"
+    icon="rocket"
+    href="/quickstart"
+  >
+    Start using ZKCash in 5 minutes
+  </Card>
+  <Card
+    title="How It Works"
+    icon="lightbulb"
+    href="/concepts/how-it-works"
+  >
+    Learn about the privacy technology
+  </Card>
+</CardGroup>
+
+## Key Features
+
+<Columns cols={2}>
+  <Card
+    title="Any mints" 
+    icon="shield-check"
+    href="/concepts/privacy"
+  >
+    Arbitrary mint support in UTXOs
+  </Card>
+  <Card
+    title="Private Swaps"
+    icon="lock"
+    href="/features/deposit"
+  >
+    Dual-token circuit in Circom
+  </Card>
+  <Card
+    title="Anonymous Withdrawals"
+    icon="unlock"
+    href="/features/withdraw"
+  >
+    Withdraw to any address without revealing your identity
+  </Card>
+  <Card
+    title="Private Swaps"
+    icon="arrows-rotate"
+    href="/features/swap"
+  >
+    Exchange tokens privately using Jupiter integration
+  </Card>
+  <Card
+    title="Private Bridge"
+    icon="bridge"
+    href="/features/bridge"
+  >
+    Transfer tokens between chains anonymously
+  </Card>
+</Columns>
+
+## How It Works
+
+<Steps>
+  <Step title="Deposit Tokens">
+    Send tokens to the protocol and receive a private note. This note represents your balance but doesn't reveal any information on-chain.
+  </Step>
+  <Step title="Make Private Transactions">
+    Use your notes to transact privately. The protocol verifies you have the funds without revealing which deposit you're spending from.
+  </Step>
+  <Step title="Withdraw or Swap">
+    Withdraw to any address or swap to different tokens. The recipient can't trace back to your original deposit.
+  </Step>
+</Steps>
+
+## Why Privacy Matters
+
+- **Financial Privacy**: Keep your balance and transaction history confidential
+- **Security**: Protect yourself from targeted attacks based on wallet balance
+- **Freedom**: Transact without surveillance or censorship
+- **Fungibility**: All tokens are equal, preventing discrimination based on history
+
+## Supported Tokens
+
+<CardGroup cols={3}>
+  <Card title="Native SOL" icon="coins">
+    Automatic WSOL wrapping/unwrapping
+  </Card>
+  <Card title="All SPL Tokens" icon="layer-group">
+    USDC, USDT, and any standard token
+  </Card>
+  <Card title="Cross-Token Swaps" icon="shuffle">
+    Powered by Jupiter Aggregator
+  </Card>
+</CardGroup>
+
+## Use Cases
+
+<Columns cols={2}>
+  <Card title="Personal Privacy" icon="user-lock">
+    Keep your financial activity private from public scrutiny
+  </Card>
+  <Card title="Business Operations" icon="building">
+    Protect sensitive business transactions and balances
+  </Card>
+  <Card title="Payroll" icon="money-bill">
+    Pay employees without revealing total payroll amounts
+  </Card>
+  <Card title="DeFi Trading" icon="chart-line">
+    Trade without exposing your strategy to front-runners
+  </Card>
+</Columns>
+
+## Security & Trust
+
+- **Non-custodial**: You always control your funds
+- **Audited Cryptography**: Uses industry-standard Groth16 zkSNARKs
+- **Open Source**: All code is publicly verifiable
+- **Battle-tested**: Based on proven Tornado Cash design
+
+<Card
+  title="Learn More"
+  icon="book"
+  href="/concepts/how-it-works"
+>
+  Dive deeper into how ZKCash protects your privacy
+</Card>

@@ -10,21 +10,25 @@ import {
   FEE_RECIPIENT,
   FIELD_SIZE,
   MERKLE_TREE_DEPTH,
+  SWAP_FEE_RATE,
 } from "../utils/constants";
 import { EncryptionService } from "../utils/encryption";
 import type { Signed } from "../utils/getAccountSign";
-
+import {
+  getAssociatedTokenAddressSync,
+} from "@solana/spl-token";
 import { publicKeyToFieldElement, getSwapExtDataHash } from "../utils/getExtDataHash";
 import { getMyUtxos, isUtxoSpent } from "../utils/getMyUtxos";
 import { MerkleTree } from "../utils/merkle_tree";
 import { parseProofToBytesArray, parseToBytesArray, prove } from "../utils/prover";
 import { findGlobalConfigPDA } from "../utils/derive";
-import { Zkcash } from "../idl/zert";
+import { Zkcash } from "../idl/zkcash";
 import { Program } from "@coral-xyz/anchor";
 import { ProofInput, ProofToSubmit, SwapData } from "../utils/types";
 import { queryRemoteTreeState, fetchMerkleProof } from "../utils/indexer";
 import { extractJupiterSwapInstruction, getJupiterSwapTransaction, JupiterQuoteResponse } from "../utils/jupiter";
 import { sendSwapToRelayer, waitForJobCompletion } from "../utils/relayer";
+import { parseTransactionError } from "../utils/errorParser";
 
 /**
  * Swap with Relayer (Async Job-based)
@@ -48,12 +52,17 @@ export async function swapWithRelayer(
   console.log("swapResponse:", swapResponse);
   const jupiterSwapInstruction = extractJupiterSwapInstruction(swapResponse);
 
-  const swapFee = 0;
+  const swapFee = Math.floor(amountToSwap * SWAP_FEE_RATE);
 
   let lightWasm = hasher;
 
   const encryptionService = new EncryptionService();
   encryptionService.deriveEncryptionKeyFromSignature(signed.signature);
+
+  console.log("Preparing swap with relayer...");
+  console.log(`Amount to swap: ${amountToSwap} lamports`);
+  console.log(`Min amount out: ${minAmountOut} lamports`);
+  console.log(`Fee: ${swapFee} lamports`);
 
   const tree = new MerkleTree(MERKLE_TREE_DEPTH, lightWasm);
 
@@ -63,7 +72,8 @@ export async function swapWithRelayer(
   try {
     const data = await queryRemoteTreeState();
     root = data.root;
-    currentNextIndex = data.nextIndex;
+    console.log("root:", root);
+    currentNextIndex = data.nextIndex;  
   } catch (error) {
     console.error("Failed to fetch root and nextIndex from API, exiting");
     throw new Error("Failed to fetch tree state from indexer");
@@ -72,7 +82,7 @@ export async function swapWithRelayer(
   const utxoPrivateKey = encryptionService.deriveUtxoPrivateKey();
 
   const utxoKeypair = new UtxoKeypair(utxoPrivateKey, lightWasm);
-  
+
   setStatus?.("Fetching UTXOs...");
   const allUtxos = await getMyUtxos(signed, connection, setStatus, hasher);
 
@@ -80,7 +90,7 @@ export async function swapWithRelayer(
     if (!utxo.amount.gt(new BN(0))) {
       return false;
     }
-    
+
     const utxoMintString = publicKeyToFieldElement(inputMintAddress);
     return utxo.amount.gt(new BN(0)) && utxo.mintAddress === utxoMintString;
   });
@@ -88,11 +98,11 @@ export async function swapWithRelayer(
     if (!utxo.amount.gt(new BN(0))) {
       return false;
     }
-    
+
     const utxoMintString = publicKeyToFieldElement(outputMintAddress);
     return utxo.amount.gt(new BN(0)) && utxo.mintAddress === utxoMintString;
   });
-  
+
   const utxoSpentStatuses = await Promise.all(
     inputMintUtxos.map((utxo) => isUtxoSpent(connection, utxo))
   );
@@ -113,10 +123,10 @@ export async function swapWithRelayer(
     );
   }
 
-  const firstUtxo = existingUnspentInputMintUtxos[0];  
-  if (firstUtxo.amount.lt(new BN(amountToSwap))) {
+  const firstUtxo = existingUnspentInputMintUtxos[0];
+  if (firstUtxo.amount.lt(new BN(amountToSwap + swapFee))) {
     throw new Error(
-      `Insufficient balance in UTXO: ${firstUtxo.amount.toString()} < ${amountToSwap}`
+      `Insufficient balance in UTXO: ${firstUtxo.amount.toString()} < ${amountToSwap + swapFee} (including fee)`
     );
   }
   let inputs: Utxo[];
@@ -144,12 +154,12 @@ export async function swapWithRelayer(
     ];
 
     inputMerklePathElements = [
-      firstUtxoMerkleProof.pathElements,  
+      firstUtxoMerkleProof.pathElements,
       [...new Array(tree.levels).fill("0")],
     ];
   } else {
     const outputMintUtxo = existingUnspentOutputMintUtxos[0];
-    
+
     inputs = [
       firstUtxo,
       outputMintUtxo,
@@ -176,24 +186,27 @@ export async function swapWithRelayer(
     .add(FIELD_SIZE)
     .mod(FIELD_SIZE);
   const publicAmount1 = new BN(minAmountOut).add(FIELD_SIZE).mod(FIELD_SIZE);
-  
+
   // Sum only input mint UTXOs, not output mint UTXOs
   const inputMintField = publicKeyToFieldElement(inputMintAddress);
   const inputMintInputsSum = inputs
     .filter(utxo => utxo.mintAddress === inputMintField)
     .reduce((sum, x) => sum.add(x.amount), new BN(0));
-    
+
   console.log("inputMintInputsSum:", inputMintInputsSum.toString());
   const remainingAmountInputMint = inputMintInputsSum
     .sub(new BN(amountToSwap))
     .sub(new BN(swapFee));
   console.log("remainingAmountInputMint:", remainingAmountInputMint.toString());
+  console.log(
+    `Swapping ${amountToSwap} lamports with ${swapFee} fee, ${remainingAmountInputMint.toString()} remaining`
+  );
   // Output combines existing output mint UTXO amount + swapped amount
   const existingOutputMintAmount = existingUnspentOutputMintUtxos.length > 0
     ? existingUnspentOutputMintUtxos[0].amount
     : new BN(0);
   const swappedAmountOutputMint = existingOutputMintAmount.add(new BN(minAmountOut));
-
+  
   const outputs = [
     new Utxo({
       lightWasm,
@@ -210,7 +223,7 @@ export async function swapWithRelayer(
       index: currentNextIndex + 1,
     }),
   ];
-
+  console.log("outputs:", outputs);
   const inputNullifiers = await Promise.all(
     inputs.map((x) => x.getNullifier())
   );
@@ -220,13 +233,14 @@ export async function swapWithRelayer(
 
   setStatus?.("Encrypting outputs...");
   const encryptedOutput = encryptionService.encryptUtxos(outputs);
+  const feeRecipientTokenAccount = getAssociatedTokenAddressSync(new PublicKey(outputMintAddress), FEE_RECIPIENT, true)
 
   const swapData: SwapData = {
     extAmount: new BN(-amountToSwap),
     extMinAmountOut: new BN(minAmountOut),
     encryptedOutput: Buffer.from(encryptedOutput),
     fee: new BN(swapFee),
-    feeRecipient: FEE_RECIPIENT,
+    feeRecipient: feeRecipientTokenAccount,
     mintAddressA: new PublicKey(inputMintAddress),
     mintAddressB: new PublicKey(outputMintAddress),
   };
@@ -256,6 +270,7 @@ export async function swapWithRelayer(
 
   setStatus?.("Generating ZK proof... (this may take a minute)");
   console.log("Generating proof...");
+  console.log("input:", input);
   const { proof, publicSignals } = await prove(input, CIRCUIT_PATH);
 
   const proofInBytes = parseProofToBytesArray(proof);
@@ -305,7 +320,7 @@ export async function swapWithRelayer(
       fee: swapFee.toString(),
     },
     encryptedOutput: Array.from(encryptedOutput),
-    feeRecipient: FEE_RECIPIENT.toString(),
+    feeRecipient: feeRecipientTokenAccount.toString(), 
     inputMint: inputMintAddress,
     outputMint: outputMintAddress,
     jupiterSwapData: jupiterSwapInstruction.data.toString('base64'),
@@ -343,9 +358,9 @@ export async function swapWithRelayer(
   }
 
   if (jobResult.status === "failed" || !jobResult.result?.success) {
-    throw new Error(
-      jobResult.result?.error || jobResult.error || "Swap failed"
-    );
+    const errorMsg = jobResult.result?.error || jobResult.error || "Swap failed";
+    // Error message is already parsed by relayer, but we keep parseTransactionError just in case
+    throw new Error(errorMsg);
   }
 
   console.log("Swap completed successfully!");
@@ -356,7 +371,7 @@ export async function swapWithRelayer(
 
   // Wait for confirmation
   setStatus?.("Waiting for blockchain confirmation...");
-  await new Promise((resolve) => setTimeout(resolve, 5000));
+  await new Promise((resolve) => setTimeout(resolve, 500));
 
   return {
     signature: jobResult.result.signature,

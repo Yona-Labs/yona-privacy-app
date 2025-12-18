@@ -53,3 +53,4 @@ frontend/package-lock.json
 # Circuits - hidden for security audit
 circuits/*.circom
 circuits/artifacts/
+

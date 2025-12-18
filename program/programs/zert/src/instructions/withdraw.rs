@@ -93,8 +93,6 @@ pub fn handler(
     ext_data_minified: ExtDataMinified, 
     encrypted_output: Vec<u8>, 
 ) -> Result<()> {
-
-    msg!("withdraw: {:?}", ext_data_minified.ext_amount);
     let tree_account = &mut ctx.accounts.tree_account.load_mut()?;
     let global_config = &ctx.accounts.global_config;
 
@@ -130,17 +128,11 @@ pub fn handler(
 
     // For single-token transactions, only publicAmount0 is used
     // The circuit validates that both mint addresses match and balance equations hold
-    msg!("proof.public_amount0: {:?}", proof.public_amount0);
-    msg!("ext_data.ext_amount: {:?}", ext_data.ext_amount);
-    msg!("ext_data.fee: {:?}", ext_data.fee);
     require!(
         utils::check_public_amount(ext_data.ext_amount, ext_data.fee, proof.public_amount0),
         ErrorCode::InvalidPublicAmountData
     );
-
-    // publicAmount1 must be zero in single-token mode
-    let public_amount1_fr = Fr::from_be_bytes_mod_order(&proof.public_amount1);
-
+    require!(proof.public_amount1 == [0; 32], ErrorCode::InvalidPublicAmountData); // publicAmount1 must be zero in single-token SOL mode
     
     let ext_amount = ext_data.ext_amount;
     let fee = ext_data.fee;
@@ -176,6 +168,19 @@ pub fn handler(
     ];
     let signer_seeds = &[&global_config_seeds[..]];
     
+    // fee first because we destroy token account
+    if fee > 0 {
+        let fee_transfer_ctx = CpiContext::new_with_signer(
+            ctx.accounts.token_program.to_account_info(),
+            Transfer {
+                from: ctx.accounts.reserve_token_account.to_account_info(),
+                to: ctx.accounts.fee_recipient_account.to_account_info(),
+                authority: ctx.accounts.global_config.to_account_info(),
+            },
+            signer_seeds,
+        );
+        transfer(fee_transfer_ctx, fee)?;
+    }
 
     // Check if the mint is native SOL (Wrapped SOL)
     let is_native_sol = native_mint::ID == ctx.accounts.input_mint.key();
@@ -242,26 +247,10 @@ pub fn handler(
         transfer(transfer_ctx, withdrawal_amount_u64)?;
     }
 
-    // TODO: Handle fee transfer if fee > 0
-    // if fee > 0 {
-    //     let fee_transfer_ctx = CpiContext::new_with_signer(
-    //         ctx.accounts.token_program.to_account_info(),
-    //         Transfer {
-    //             from: ctx.accounts.reserve_token_account.to_account_info(),
-    //             to: ctx.accounts.fee_recipient_account.to_account_info(),
-    //             authority: ctx.accounts.global_config.to_account_info(),
-    //         },
-    //         signer_seeds,
-    //     );
-    //     transfer(fee_transfer_ctx, fee)?;
-   
 
     let next_index_to_insert = tree_account.next_index;
     MerkleTree::append::<Poseidon>(proof.output_commitments[0], tree_account)?;
     MerkleTree::append::<Poseidon>(proof.output_commitments[1], tree_account)?;
-
-    let second_index = next_index_to_insert.checked_add(1)
-        .ok_or(ErrorCode::ArithmeticOverflow)?;
 
     emit!(CommitmentData {
         index: next_index_to_insert,

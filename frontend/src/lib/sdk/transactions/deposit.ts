@@ -38,7 +38,7 @@ import {
   findMerkleTreePDA,
   findTreeTokenAccountPDA,
 } from "../utils/derive";
-import { Zert } from "../idl/zert";
+import { Zkcash } from "../idl/zkcash";
 import { Program } from "@coral-xyz/anchor";
 import { ExtData, ProofInput, ProofToSubmit } from "../utils/types";  
 import { buildDepositInstruction } from "./instructions";
@@ -48,7 +48,7 @@ export async function deposit(
   amount_in_sol: number,
   signed: Signed,
   connection: Connection,
-  program: Program<Zert>,
+  program: Program<Zkcash>,
   mintAddress: string,
   signAllTransactions: any,
   setStatus?: Function,
@@ -247,7 +247,7 @@ export async function deposit(
     outPubkey: outputs.map((x) => x.keypair.pubkey),
     outBlinding: outputs.map((x) => x.blinding.toString(10)),
   };
-
+  console.log("input:", input);
   setStatus?.(`(generating ZK proof...)`);
   const { proof, publicSignals } = await prove(input, CIRCUIT_PATH);
   const proofInBytes = parseProofToBytesArray(proof);

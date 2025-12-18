@@ -37,6 +37,11 @@ export const ShieldPanel = ({ hasher }: { hasher: LightWasm }) => {
     }
   };
 
+  // Check if balance is sufficient
+  const numericAmount = parseFloat(amount || "0");
+  const numericBalance = parseFloat(selectedTokenInfo?.balance || "0");
+  const hasInsufficientBalance = !!amount && numericAmount > numericBalance;
+
   return (
     <>
       {(!connected || !publicKey) && !connecting && (
@@ -69,12 +74,17 @@ export const ShieldPanel = ({ hasher }: { hasher: LightWasm }) => {
 
           <Button
             onClick={onDeposit}
-            disabled={isDepositing || !amount}
+            disabled={
+              isDepositing || 
+              !amount || 
+              parseFloat(amount || "0") <= 0 ||
+              hasInsufficientBalance
+            }
             className="w-full"
             isLoading={isDepositing}
             loadingInfo="Processing..."
           >
-            Shield
+            {hasInsufficientBalance ? "Insufficient Balance" : "Shield"}
           </Button>
 
           {error && (
@@ -92,13 +102,7 @@ export const ShieldPanel = ({ hasher }: { hasher: LightWasm }) => {
             </div>
           )}
 
-          <div className="pt-4 px-3">
-            <p className="text-xs text-secondary-text">
-              <strong>Note:</strong> Your deposit will be made private using
-              zero-knowledge proofs. You will need to sign the transaction with
-              your wallet.
-            </p>
-          </div>
+       
         </div>
       )}
     </>

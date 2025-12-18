@@ -3,12 +3,12 @@ import {
   PublicKey,
   ParsedTransactionWithMeta,
 } from "@solana/web3.js";
-import { MerkleTree, DEFAULT_ZERO } from "./merkle-tree";
+import { MerkleTree, DEFAULT_ZERO } from "./lib/merkle-tree";
 import { LightWasm } from "@lightprotocol/hasher.rs";
 import { BorshCoder, EventParser, Idl } from "@coral-xyz/anchor";
-import idl from "./zkcash.json";
+import idl from "./lib/idl/zkcash.json";
 import { parseLogs } from "@debridge-finance/solana-transaction-parser";
-import { decodeEvent, ParsedEvent } from "./event-decoder";
+import { decodeEvent, ParsedEvent } from "./utils/event-decoder";
 import { IsNull, Not, Repository } from "typeorm";
 import { CommitmentEvent } from "./entities/CommitmentEvent";
 
@@ -29,9 +29,6 @@ export class SolanaEventListener {
   private merkleTree: MerkleTree;
   private commitmentRepository: Repository<CommitmentEvent>;
   private isRunning: boolean = false;
-  private currentSlot: number = 0;
-  private eventParser: EventParser;
-  private coder: BorshCoder;
 
   constructor(
     connection: Connection,
@@ -43,8 +40,6 @@ export class SolanaEventListener {
     this.programId = programId;
     this.merkleTree = merkleTree;
     this.commitmentRepository = commitmentRepository;
-    this.coder = new BorshCoder(idl as Idl);
-    this.eventParser = new EventParser(this.programId, this.coder);
   }
 
   /**
@@ -58,12 +53,14 @@ export class SolanaEventListener {
 
     console.log("Starting event listener...");
     console.log("Program ID:", this.programId.toString());
-
+    await this.commitmentRepository.delete({ commitment: Not(IsNull()) });
     // Load existing commitments from database and rebuild merkle tree
-    await this.loadCommitmentsFromDatabase();
+    const lastDatabaseSignature = await this.loadCommitmentsFromDatabase();
+    console.log("Last database signature:", lastDatabaseSignature);
+
 
     // Load historical transactions first
-    await this.loadHistoricalTransactions();
+    await this.loadHistoricalTransactions(lastDatabaseSignature); 
 
     this.isRunning = true;
 
@@ -76,7 +73,7 @@ export class SolanaEventListener {
   /**
    * Load existing commitments from database and rebuild merkle tree
    */
-  private async loadCommitmentsFromDatabase(): Promise<void> {
+  private async loadCommitmentsFromDatabase(): Promise<string | undefined> {
     try {
       console.log("Loading commitments from database...");
       const events = await this.commitmentRepository.find({
@@ -113,8 +110,11 @@ export class SolanaEventListener {
           events.length
         } commitments, root: ${this.merkleTree.root().substring(0, 16)}...`
       );
+
+      return events[events.length - 1].signature;
     } catch (error) {
       console.error("Error loading commitments from database:", error);
+      return undefined;
     }
   }
 
@@ -167,14 +167,40 @@ export class SolanaEventListener {
   /**
    * Load historical transactions from the program
    */
-  private async loadHistoricalTransactions(): Promise<void> {
+  private async loadHistoricalTransactions(lastSignature: string | undefined): Promise<void> {
     try {
       console.log("Loading historical transactions...");
-
-      const signatures = await this.connection.getSignaturesForAddress(
-        this.programId,
-        { limit: 1000 }
-      );
+      const signatures: string[] = [];
+      
+      // Start from most recent transactions (currentSignature = undefined)
+      // Go backwards until we find lastSignature from DB or reach the end
+      let currentSignature: string | undefined = undefined;
+      
+      while (true) {
+        const newSignatures = await this.connection.getSignaturesForAddress(
+          this.programId,
+          { before: currentSignature, limit: 1000 }
+        );
+        if (newSignatures.length === 0) {
+          break;
+        }
+        
+        // Check if we've reached the last processed transaction from DB
+        const lastSigIndex = lastSignature 
+          ? newSignatures.findIndex(s => s.signature === lastSignature)
+          : -1;
+        
+        if (lastSigIndex !== -1) {
+          // Found lastSignature in this batch, only add signatures before it (newer ones)
+          signatures.push(...newSignatures.slice(0, lastSigIndex).map((s) => s.signature));
+          console.log(`Reached last processed transaction ${lastSignature}, stopping`);
+          break;
+        }
+        
+        // Haven't found lastSignature yet, add all and continue
+        signatures.push(...newSignatures.map((s) => s.signature));
+        currentSignature = newSignatures[newSignatures.length - 1].signature;
+      }
 
       console.log(`Found ${signatures.length} historical transactions`);
 
@@ -184,18 +210,18 @@ export class SolanaEventListener {
       const reversedSignatures = signatures.reverse();
       let processedCount = 0;
       let skippedCount = 0;
-
+      console.log("Processing transactions in chronological order (oldest first):", reversedSignatures);
       for (const sigInfo of reversedSignatures) {
         try {
           const tx = await this.connection.getParsedTransaction(
-            sigInfo.signature,
+            sigInfo,
             {
               maxSupportedTransactionVersion: 0,
             }
           );
 
           if (tx) {
-            await this.processTransaction(tx, sigInfo.signature);
+            await this.processTransaction(tx, sigInfo);
             processedCount++;
           }
         } catch (error) {
@@ -206,11 +232,11 @@ export class SolanaEventListener {
           ) {
             skippedCount++;
             console.log(
-              `Skipping transaction ${sigInfo.signature} (program deployment/upgrade)`
+              `Skipping transaction ${sigInfo} (program deployment/upgrade)`
             );
           } else {
             console.error(
-              `Error processing transaction ${sigInfo.signature}:`,
+              `Error processing transaction ${sigInfo}:`,
               error
             );
           }
@@ -292,13 +318,25 @@ export class SolanaEventListener {
                   )}..., commitment1=${data.commitment1?.substring(0, 16)}...`
                 );
 
+                // HARDCODED FIX: This specific transaction had a bug in the event (+1 offset)
+                // Real indices should be 223 and 224, not 225 and 226
+                const BUGGY_TX = "4Broavxx1HCBrJyDFenSNW9xPL2uKH5rcb4MYZCzEr3PdDUsg2n34mfKBpaxByAdLagmcuBqDMFNZ7Q97gW9cPvK";
+                let firstIndex = Number(data.index);
+                let secondIndex = Number(data.index) + 1;
+                
+                if (signature === BUGGY_TX) {
+                  console.log(`⚠️  Detected buggy transaction ${BUGGY_TX}, applying hardcoded fix: 225 -> 223, 226 -> 224`);
+                  firstIndex = firstIndex - 1;
+                  secondIndex = secondIndex - 1;
+                }
+
                 // Add first commitment at index
                 console.log(
-                  `Adding commitment0 at index ${Number(data.index)}`
+                  `Adding commitment0 at index ${firstIndex}`
                 );
                 await this.addCommitment(
                   data.commitment0,
-                  Number(data.index),
+                  firstIndex,
                   ctx.slot,
                   signature,
                   data.encryptedOutput
@@ -306,7 +344,6 @@ export class SolanaEventListener {
 
                 // Add second commitment at index + 1 (if exists)
                 if (data.commitment1) {
-                  const secondIndex = Number(data.index) + 1;
                   console.log(`Adding commitment1 at index ${secondIndex}`);
                   await this.addCommitment(
                     data.commitment1,
@@ -399,11 +436,23 @@ export class SolanaEventListener {
               )}..., commitment1=${data.commitment1?.substring(0, 16)}...`
             );
 
+            // HARDCODED FIX: This specific transaction had a bug in the event (+1 offset)
+            // Real indices should be 223 and 224, not 225 and 226
+            const BUGGY_TX = "4Broavxx1HCBrJyDFenSNW9xPL2uKH5rcb4MYZCzEr3PdDUsg2n34mfKBpaxByAdLagmcuBqDMFNZ7Q97gW9cPvK";
+            let firstIndex = Number(data.index);
+            let secondIndex = Number(data.index) + 1;
+            
+            if (signature === BUGGY_TX) {
+              console.log(`⚠️  Detected buggy transaction ${BUGGY_TX}, applying hardcoded fix: 225 -> 223, 226 -> 224`);
+              firstIndex = firstIndex - 1;
+              secondIndex = secondIndex - 1;
+            }
+
             // Add first commitment at index
-            console.log(`Adding commitment0 at index ${Number(data.index)}`);
+            console.log(`Adding commitment0 at index ${firstIndex}`);
             await this.addCommitment(
               data.commitment0,
-              Number(data.index),
+              firstIndex,
               tx.slot,
               signature,
               data.encryptedOutput
@@ -411,7 +460,6 @@ export class SolanaEventListener {
 
             // Add second commitment at index + 1 (if exists)
             if (data.commitment1) {
-              const secondIndex = Number(data.index) + 1;
               console.log(`Adding commitment1 at index ${secondIndex}`);
               await this.addCommitment(
                 data.commitment1,

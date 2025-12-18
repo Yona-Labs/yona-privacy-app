@@ -40,7 +40,7 @@ function App() {
                   <Route path="/bridge" element={<Bridge />} />
                   <Route path="/portfolio" element={<Portfolio />} />
 
-                  <Route path="*" element={<Navigate to="/shield" replace />} />
+                  <Route path="*" element={<Navigate to="/swap" replace />} />
                 </Routes>
               </main>
             </div>

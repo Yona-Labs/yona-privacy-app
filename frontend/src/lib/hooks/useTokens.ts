@@ -1,6 +1,7 @@
 import { useQuery, UseQueryResult } from "@tanstack/react-query";
 import { useConnection, useWallet } from "@solana/wallet-adapter-react";
 import { LAMPORTS_PER_SOL } from "@solana/web3.js";
+import { formatNumber } from "@/lib/utils/formatNumber";
 
 export interface TokenInfo {
   mint: string;
@@ -38,7 +39,7 @@ export function useTokens(): UseQueryResult<TokenInfo[], Error> {
             mint: "So11111111111111111111111111111111111111112",
             symbol: "SOL",
             decimals: 9,
-            balance: (solBalance / LAMPORTS_PER_SOL).toFixed(6),
+            balance: formatNumber(solBalance / LAMPORTS_PER_SOL),
           });
         }
 

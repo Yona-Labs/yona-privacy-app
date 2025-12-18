@@ -2,7 +2,7 @@ import Fastify, { FastifyInstance } from "fastify";
 import cors from "@fastify/cors";
 import { Connection } from "@solana/web3.js";
 import { WasmFactory, LightWasm } from "@lightprotocol/hasher.rs";
-import { MerkleTree } from "./merkle-tree";
+import { MerkleTree } from "./lib/merkle-tree";
 import { SolanaEventListener } from "./event-listener";
 import { loadConfig, Config } from "./config";
 import { handleWithdraw, handleSwap, WithdrawRequest, SwapRequest } from "./relayer";

@@ -180,7 +180,7 @@ describe("bankrun", () => {
   });
 
   it("Withdraw", async () => {
-    const withdrawalAmount = 500; // Withdraw 500 tokens 
+    const withdrawalAmount = 500; // Withdraw 500 tokens (оставим 500 для swap)
     const withdrawalFee = new anchor.BN(calculateWithdrawalFee(withdrawalAmount)); // Fee based on withdrawal amount
 
     await createAtaBankrun(banksClient, admin, recipient.publicKey, mintAddressA); 

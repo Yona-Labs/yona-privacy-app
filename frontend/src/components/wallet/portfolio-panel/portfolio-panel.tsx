@@ -5,6 +5,7 @@ import { Link } from "react-router";
 import { useUtxos } from "@/lib/hooks";
 import { SwapIcon, ShieldIcon } from "@/components/icons";
 import { Button } from "@/components/Button";
+import { formatNumber } from "@/lib/utils/formatNumber";
 
 interface PortfolioAsset {
   symbol: string;
@@ -37,7 +38,7 @@ function calculatePortfolioAssets(
       symbol: "SOL",
       iconType: "sol",
       quantity: utxoBalance,
-      quantityDisplay: `${utxoBalance.toFixed(2)} `,
+      quantityDisplay: `${formatNumber(utxoBalance)} `,
       description: "Solana (Private)",
     });
   }

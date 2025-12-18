@@ -1,6 +1,7 @@
 import { useQuery, UseQueryResult } from "@tanstack/react-query";
 import { getJupiterQuote, JupiterQuoteResponse } from "@/lib/sdk/utils/jupiter";
 import { getTokenInfo } from "@/lib/sdk/utils/tokenInfo";
+import { SLIPPAGE_BPS } from "@/lib/sdk/utils/constants";
 
 /**
  * Hook to fetch Jupiter swap quote
@@ -10,7 +11,7 @@ export function useJupiterQuote(
   inputMint: string | null,
   outputMint: string | null,
   amount: string,
-  slippageBps: number = 50
+  slippageBps: number = SLIPPAGE_BPS
 ): UseQueryResult<JupiterQuoteResponse | null, Error> {
   return useQuery({
     queryKey: ["jupiterQuote", inputMint, outputMint, amount, slippageBps],

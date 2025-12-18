@@ -21,7 +21,7 @@ pub use errors::ErrorCode;
 pub const ADMIN_PUBKEY: Option<Pubkey> = Some(pubkey!("DJZCAiVf4WTB84iziDjXXpW32EJinEwbyary79NMjWz7"));
 
 #[program]
-pub mod zert {
+pub mod zkcash {
     use super::*;
 
     pub fn initialize(ctx: Context<Initialize>) -> Result<()> {

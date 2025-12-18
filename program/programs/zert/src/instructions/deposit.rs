@@ -64,11 +64,7 @@ pub struct Transact<'info> {
     )]
     pub reserve_token_account: Box<InterfaceAccount<'info, TokenAccount>>,
 
-    // #[account(
-    //     mut,
-    //     associated_token::mint = input_mint,
-    //     associated_token::authority = global_config,
-    // )]
+
     /// CHECK: user should be able to send fees to any types of accounts
     pub fee_recipient_account: UncheckedAccount<'info>,
 
@@ -119,12 +115,6 @@ pub fn handler(
         ctx.accounts.input_mint.key(),
         ctx.accounts.input_mint.key(),
     )?;
-    msg!("ext_data.recipient: {:?}", ext_data.recipient);
-    msg!("ext_data.ext_amount: {:?}", ext_data.ext_amount);
-    msg!("ext_data.fee: {:?}", ext_data.fee);
-    msg!("ext_data.fee_recipient: {:?}", ext_data.fee_recipient);
-    msg!("ctx.accounts.input_mint.key(): {:?}", ctx.accounts.input_mint.key());
-
     
     require!(
         Fr::from_le_bytes_mod_order(&calculated_ext_data_hash) == Fr::from_be_bytes_mod_order(&proof.ext_data_hash),
@@ -137,11 +127,7 @@ pub fn handler(
         utils::check_public_amount(ext_data.ext_amount, ext_data.fee, proof.public_amount0),
         ErrorCode::InvalidPublicAmountData
     );
-
-    // publicAmount1 must be zero in single-token SOL mode
-    let public_amount1_fr = Fr::from_be_bytes_mod_order(&proof.public_amount1);
-
-    
+    require!(proof.public_amount1 == [0; 32], ErrorCode::InvalidPublicAmountData); // publicAmount1 must be zero in single-token SOL mode
     let ext_amount = ext_data.ext_amount;
     let fee = ext_data.fee;
 
@@ -155,13 +141,11 @@ pub fn handler(
     )?;
 
     // Verify the proof
-    
     require!(verify_proof(proof.clone(), VERIFYING_KEY, ctx.accounts.input_mint.key(), ctx.accounts.input_mint.key()), ErrorCode::InvalidProof);
 
-    msg!("ext_amount: {:?}", ext_amount);
     require!(ext_amount > 0, ErrorCode::InvalidExtAmount);
-
     let deposit_amount = ext_amount as u64;
+
     require!(
         deposit_amount <= tree_account.max_deposit_amount,
         ErrorCode::DepositLimitExceeded
@@ -177,38 +161,21 @@ pub fn handler(
     );
     transfer(transfer_ctx, deposit_amount)?;
     
-    // if fee > 0 {
-    //     let fee_recipient_account_info = ctx.accounts.fee_recipient_account.to_account_info();
-
-    //     if ext_amount >= 0 {
-    //         let total_required = fee
-    //             .checked_add(rent_exempt_minimum)
-    //             .ok_or(ErrorCode::ArithmeticOverflow)?;
-            
-    //         require!(
-    //             tree_token_account_info.lamports() >= total_required,
-    //             ErrorCode::InsufficientFundsForFee
-    //         );
-    //     }
-
-    //     let tree_token_balance = tree_token_account_info.lamports();
-    //     let fee_recipient_balance = fee_recipient_account_info.lamports();
-        
-    //     let new_tree_token_balance = tree_token_balance.checked_sub(fee)
-    //         .ok_or(ErrorCode::ArithmeticOverflow)?;
-    //     let new_fee_recipient_balance = fee_recipient_balance.checked_add(fee)
-    //         .ok_or(ErrorCode::ArithmeticOverflow)?;
-            
-    //     **tree_token_account_info.try_borrow_mut_lamports()? = new_tree_token_balance;
-    //     **fee_recipient_account_info.try_borrow_mut_lamports()? = new_fee_recipient_balance;
-    // }
+    if fee > 0 {
+        let transfer_ctx = CpiContext::new(
+            ctx.accounts.token_program.to_account_info(),
+            Transfer {
+                from: ctx.accounts.user_token_account.to_account_info(),
+                to: ctx.accounts.fee_recipient_account.to_account_info(),
+                authority: ctx.accounts.user.to_account_info(),
+            },
+        );
+        transfer(transfer_ctx, fee)?;
+    }
 
     let next_index_to_insert = tree_account.next_index;
     MerkleTree::append::<Poseidon>(proof.output_commitments[0], tree_account)?;
     MerkleTree::append::<Poseidon>(proof.output_commitments[1], tree_account)?;
-
-    let second_index = next_index_to_insert.checked_add(1)
-        .ok_or(ErrorCode::ArithmeticOverflow)?;
 
     emit!(CommitmentData {
         index: next_index_to_insert,

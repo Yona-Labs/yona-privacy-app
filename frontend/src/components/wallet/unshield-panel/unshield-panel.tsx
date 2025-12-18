@@ -147,13 +147,7 @@ export const UnshieldPanel = ({ hasher }: { hasher: LightWasm }) => {
             </div>
           )}
 
-          <div className="pt-4 px-3">
-            <p className="text-xs text-secondary-text">
-              <strong>Note:</strong> Your withdrawal will maintain privacy using
-              zero-knowledge proofs. You will need to sign the transaction with
-              your wallet.
-            </p>
-          </div>
+         
         </div>
       )}
     </>

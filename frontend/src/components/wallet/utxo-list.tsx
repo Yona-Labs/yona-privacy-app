@@ -1,8 +1,7 @@
-;
-
 import { LAMPORTS_PER_SOL } from '@solana/web3.js';
 import type { Utxo } from '@/lib/sdk/models/utxo';
 import { getTokenInfo as getTokenMetadata } from '@/lib/sdk/utils/tokenInfo';
+import { formatNumber } from '@/lib/utils/formatNumber';
 
 interface UtxoListProps {
   utxos: Utxo[];
@@ -63,7 +62,7 @@ export const UtxoList = ({ utxos }: UtxoListProps) => {
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="text-sm font-medium text-primary-text">
-                      {amount.toFixed(6)} {tokenInfo.symbol}
+                      {formatNumber(amount)} {tokenInfo.symbol}
                     </div>
                     <div className="text-xs text-secondary-text font-mono">
                       {utxo.amount.toString()} {tokenInfo.decimals === 9 ? 'lamports' : 'units'}

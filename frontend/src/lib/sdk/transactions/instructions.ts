@@ -1,7 +1,7 @@
 import * as anchor from "@coral-xyz/anchor";
 import { getAssociatedTokenAddressSync, TOKEN_PROGRAM_ID, NATIVE_MINT } from "@solana/spl-token";
 import { ComputeBudgetProgram, Keypair, PublicKey, TransactionInstruction } from "@solana/web3.js";
-import { Zert } from "../idl/zert";
+import { Zkcash } from "../idl/zkcash";
 import {
   findNullifierPDAs,
   findMerkleTreePDA,
@@ -63,7 +63,7 @@ export function createSwapExtDataMinified(swapData: SwapData): SwapExtDataMinifi
  * @returns Transaction instruction
  */
 export async function buildDepositInstruction(
-  program: anchor.Program<Zert>,
+  program: anchor.Program<Zkcash>,
   proof: ProofToSubmit,
   extData: ExtData,
   signer: PublicKey,
@@ -126,7 +126,7 @@ export async function buildDepositInstruction(
  * @returns Transaction instruction
  */
 export async function buildWithdrawInstruction(
-  program: anchor.Program<Zert>,
+  program: anchor.Program<Zkcash>,
   proof: ProofToSubmit,
   extData: ExtData,
   signer: PublicKey,
@@ -194,7 +194,7 @@ export async function buildWithdrawInstruction(
  * @returns Transaction instruction
  */
 export async function buildSwapInstruction(
-  program: anchor.Program<Zert>,
+  program: anchor.Program<Zkcash>,
   proof: ProofToSubmit,
   swapData: SwapData,
   signer: PublicKey,
@@ -289,7 +289,7 @@ export async function buildSwapInstruction(
  * @returns Transaction signature
  */
 export async function executeUpdateDepositLimit(
-  program: anchor.Program<Zert>,
+  program: anchor.Program<Zkcash>,
   newLimit: anchor.BN,
   signers: anchor.web3.Keypair[],
   preInstructions?: TransactionInstruction[]
@@ -321,7 +321,7 @@ export async function executeUpdateDepositLimit(
  * @returns Transaction instruction
  */
 export async function buildUpdateGlobalConfigInstruction(
-  program: anchor.Program<Zert>,
+  program: anchor.Program<Zkcash>,
   authority: PublicKey,
   depositFeeRate?: number | null,
   withdrawalFeeRate?: number | null,
@@ -353,7 +353,7 @@ export async function buildUpdateGlobalConfigInstruction(
  * @returns Transaction signature
  */
 export async function executeUpdateGlobalConfig(
-  program: anchor.Program<Zert>,
+  program: anchor.Program<Zkcash>,
   signers: anchor.web3.Keypair[],
   depositFeeRate?: number | null,
   withdrawalFeeRate?: number | null,
@@ -388,7 +388,7 @@ export async function executeUpdateGlobalConfig(
  * @returns Transaction instruction
  */
 export async function buildInitializeInstruction(
-  program: anchor.Program<Zert>,
+  program: anchor.Program<Zkcash>,
   authority: PublicKey
 ) {
   const [treeAccount] = findMerkleTreePDA(program.programId);
@@ -415,7 +415,7 @@ export async function buildInitializeInstruction(
  * @returns Transaction signature
  */
 export async function executeInitialize(
-  program: anchor.Program<Zert>,
+  program: anchor.Program<Zkcash>,
   signers: anchor.web3.Keypair[],
   preInstructions?: TransactionInstruction[]
 ): Promise<string> {

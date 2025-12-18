@@ -113,16 +113,16 @@ async function addToAddressLookupTable() {
             console.log("Please create ALT first using create-alt.ts");
             process.exit(1);
         }
-
         const altData = JSON.parse(fs.readFileSync(altFilePath, "utf-8"));
         const lookupTableAddress = new PublicKey(altData.altAddress);
 
         // Define new addresses to add
         // Example: add new mints or ATAs here
         const newAddresses: PublicKey[] = [
-            new PublicKey("SysvarC1ock11111111111111111111111111111111"),
-            new PublicKey("SV2EYYJyRz2YhfXwXnhNAevDEui5Q6yrfyo13WtupPF"),
-            new PublicKey("65ZHSArs5XxPseKQbB1B4r16vDxMWnCxHMzogDAqiDUc"),
+            new PublicKey("6nvpMBFwYdsmY3t5nAZg8UMrSgiWuCKxk5S2NHtjhEPG"),
+            new PublicKey("Exngww2Xcozz6C9APGAgQZJwDmWG5bCqHnZAwHqGb2dJ"),
+            new PublicKey("beA1dSUuv5V991zfA1gDJ34e7xTepdm42HAheHtY6mH"),
+            new PublicKey("rBTtdLccjQ3685z5dhkECBAU3EiBC9URKSWScEuMroY"),
         ];
 
         if (newAddresses.length === 0) {

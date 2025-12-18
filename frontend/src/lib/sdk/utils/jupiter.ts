@@ -50,17 +50,17 @@ export interface JupiterSwapResponse {
  * @param inputMint - Input token mint address
  * @param outputMint - Output token mint address
  * @param amount - Amount in smallest unit (lamports for SOL, smallest unit for SPL tokens)
- * @param slippageBps - Slippage in basis points (default: 50 = 0.5%)
+ * @param slippageBps - Slippage in basis points (default: 30 = 0.3%)
  * @returns Promise with quote response
  */
 export async function getJupiterQuote(
   inputMint: string,
   outputMint: string,
   amount: string,
-  slippageBps: number = 50
+  slippageBps: number = 30
 ): Promise<JupiterQuoteResponse | null> {
   try {
-    const url = `https://lite-api.jup.ag/swap/v1/quote?inputMint=${inputMint}&outputMint=${outputMint}&amount=${amount}&slippageBps=${slippageBps}&restrictIntermediateTokens=true&maxAccounts=14`;
+    const url = `https://lite-api.jup.ag/swap/v1/quote?inputMint=${inputMint}&outputMint=${outputMint}&amount=${amount}&slippageBps=${slippageBps}&restrictIntermediateTokens=true&maxAccounts=14&excludeDexes=1DEX`;
 
     // console.log('Jupiter API Request:', {
     //   url,

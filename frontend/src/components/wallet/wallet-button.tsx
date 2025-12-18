@@ -37,7 +37,7 @@ export const WalletButton = () => {
 
         try {
           // Create a message to sign
-          const message = `Sign this message to authenticate with Zert\n\nWallet: ${walletAddress}`;
+          const message = `Sign this message to authenticate with Zert\n\nWallet: ${walletAddress}`;  
           const encodedMessage = new TextEncoder().encode(message);
 
           // Request signature from wallet
@@ -55,6 +55,9 @@ export const WalletButton = () => {
           console.log("Saved to localStorage");
 
           setHasSignedMessage(true);
+          
+          // Reload the page after successful signature
+          window.location.reload();
         } catch (error) {
           console.error("Failed to sign message:", error);
         }

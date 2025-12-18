@@ -32,6 +32,10 @@ export const DEPOSIT_FEE_RATE = 0;
 
 export const WITHDRAW_FEE_RATE = 25 / 10000;
 
+export const SWAP_FEE_RATE = 0;
+
+export const SLIPPAGE_BPS = 30; // 0.3% slippage
+
 export const ALT_ADDRESS = new PublicKey(
   "BrdQhL9oucksSyXNXnM5xdbCy5LGi2rpmpsPfDwDdKFP"
 );

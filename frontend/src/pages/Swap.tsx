@@ -15,7 +15,7 @@ export default function Swap() {
         <div>
           <div className="flex items-center gap-2 px-[34px]">
             <SwapIcon className="h-5 w-5" />
-            <h2 className="text-xl font-bold text-primary-text">Swap</h2>
+            <h2 className="text-xl font-bold text-primary-text">Private Swap</h2>
           </div>
         </div>
 

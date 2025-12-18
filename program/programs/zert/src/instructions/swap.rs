@@ -66,9 +66,9 @@ pub struct Swap<'info> {
     )]
     pub reserve_token_account_output: Box<InterfaceAccount<'info, TokenAccount>>,
 
+    #[account(mut)]
     /// CHECK: user should be able to send fees to any types of accounts
     pub fee_recipient_account: UncheckedAccount<'info>,
-
 
     /// Jupiter aggregator program
     /// CHECK: Jupiter program ID
@@ -97,11 +97,7 @@ pub fn handler(
     ext_data_minified: SwapExtDataMinified, 
     encrypted_output: Vec<u8>, 
     jupiter_swap_data: Vec<u8>,   
-) -> Result<()> {
-
-    msg!("swap: extAmount={:?}", ext_data_minified.ext_amount);
-    msg!("jupiter_swap_data provided: {:?}", jupiter_swap_data);
-    
+) -> Result<()> {    
     let tree_account = &mut ctx.accounts.tree_account.load_mut()?;
     let global_config = &ctx.accounts.global_config;
 
@@ -134,23 +130,33 @@ pub fn handler(
     );
 
     // For swaps, extAmount should typically be 0 (no net deposit or withdrawal)
+    // Calculate swap amounts from public amounts
+    // publicAmount0 is the net change in input mint (negative for swap out)
+    // publicAmount1 is the net change in output mint (positive for swap in)
+    require!(ext_data.ext_amount < 0, ErrorCode::InvalidExtAmount);
+    require!(ext_data.ext_min_amount_out >= 0, ErrorCode::InvalidExtAmount);
+
     require!(
         utils::check_public_amount(ext_data.ext_amount, ext_data.fee, proof.public_amount0),
         ErrorCode::InvalidPublicAmountData
     );
+    // zero fee for swap out
+    require!(
+        utils::check_public_amount(ext_data.ext_min_amount_out, 0, proof.public_amount1),
+        ErrorCode::InvalidPublicAmountData
+    );
 
     let ext_amount = ext_data.ext_amount;
-    let ext_min_amount_out = ext_data.ext_min_amount_out;
     let fee = ext_data.fee;
 
     // Validate fee calculation
-    // utils::validate_fee( TODO
-    //     ext_amount,
-    //     fee,
-    //     global_config.deposit_fee_rate,
-    //     global_config.withdrawal_fee_rate,
-    //     global_config.fee_error_margin,
-    // )?;
+    utils::validate_fee(
+        ext_amount,
+        fee,
+        global_config.deposit_fee_rate,
+        global_config.deposit_fee_rate,
+        global_config.fee_error_margin,
+    )?;
 
     // Verify the proof with both mint addresses
     require!(
@@ -163,23 +169,10 @@ pub fn handler(
         ErrorCode::InvalidProof
     );
 
-    // Calculate swap amounts from public amounts
-    // publicAmount0 is the net change in input mint (negative for swap out)
-    // publicAmount1 is the net change in output mint (positive for swap in)
-    
-    // Convert public amounts from field elements to i64
-    let public_amount0_bytes = proof.public_amount0;
-    let public_amount1_bytes = proof.public_amount1;
-    
-    // Parse as field elements and convert to signed amounts
-    let public_amount0_fr = Fr::from_be_bytes_mod_order(&public_amount0_bytes);
-    let public_amount1_fr = Fr::from_be_bytes_mod_order(&public_amount1_bytes);
+    // Get balance before swap
+    let balance_before = ctx.accounts.reserve_token_account_output.amount;
 
-    
-    // If Jupiter swap data is provided, execute Jupiter CPI
     if jupiter_swap_data.len() > 0 {
-
-        // Build instruction for Jupiter CPI
         let mut account_metas = Vec::new();
         
         // Add remaining accounts (these are the accounts needed by Jupiter)
@@ -195,9 +188,7 @@ pub fn handler(
                 is_writable: account.is_writable,
             });
         }
-        
-        msg!("Account metas count: {}", account_metas.len());
-        
+
         // Create Jupiter instruction
         let jupiter_instruction = Instruction {
             program_id: ctx.accounts.jupiter_program.key(),
@@ -219,17 +210,49 @@ pub fn handler(
             signer_seeds,
         )?;
         
-        msg!("Jupiter swap executed successfully");
     } else {
-        msg!("No Jupiter swap data provided, skipping Jupiter CPI");
+       return Err(ErrorCode::InvalidJupiterSwapData.into());
+    }
+
+    // Reload the output token account to get updated balance
+    ctx.accounts.reserve_token_account_output.reload()?;
+    let balance_after = ctx.accounts.reserve_token_account_output.amount;
+    
+    // Calculate actual received amount
+    let actual_amount_received = balance_after.checked_sub(balance_before)
+        .ok_or(ErrorCode::MathOverflow)?;
+    
+    // Calculate fee as difference between received and min_amount_out
+    let min_amount = ext_data.ext_min_amount_out as u64;
+    let calculated_fee = actual_amount_received.checked_sub(min_amount)
+        .ok_or(ErrorCode::InsufficientSwapOutput)?;
+    msg!("calculated_fee: {}", calculated_fee);
+    msg!("actual_amount_received: {}", actual_amount_received);
+    msg!("min_amount: {}", min_amount);
+    // Transfer the fee to fee recipient
+    if calculated_fee > 0 {
+        let global_config_seeds = &[
+            b"global_config".as_ref(),
+            &[global_config.bump],
+        ];
+        let signer_seeds = &[&global_config_seeds[..]];
+
+        let transfer_ctx = CpiContext::new_with_signer(
+            ctx.accounts.token_program.to_account_info(),
+            Transfer {
+                from: ctx.accounts.reserve_token_account_output.to_account_info(),
+                to: ctx.accounts.fee_recipient_account.to_account_info(),
+                authority: ctx.accounts.global_config.to_account_info(),
+            },
+            signer_seeds,
+        );
+        transfer(transfer_ctx, calculated_fee)?;
+        println!("Slippage fee: {}", calculated_fee);
     }
 
     let next_index_to_insert = tree_account.next_index;
     MerkleTree::append::<Poseidon>(proof.output_commitments[0], tree_account)?;
     MerkleTree::append::<Poseidon>(proof.output_commitments[1], tree_account)?;
-
-    let second_index = next_index_to_insert.checked_add(1)
-        .ok_or(ErrorCode::ArithmeticOverflow)?;
 
     emit!(CommitmentData {
         index: next_index_to_insert,
