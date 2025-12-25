@@ -74,7 +74,7 @@ const getTokenLogo = (symbol: string): string | undefined => {
   return logoMap[symbol];
 };
 
-export const PortfolioPanel = ({ hasher }: { hasher: LightWasm }) => {
+export const PortfolioPanel = ({ hasher, isReloading = false }: { hasher: LightWasm; isReloading?: boolean }) => {
   const { publicKey, connected, connecting } = useWallet();
 
   // Fetch data using hooks - only UTXOs for private tokens
@@ -89,7 +89,7 @@ export const PortfolioPanel = ({ hasher }: { hasher: LightWasm }) => {
   // Assets are already calculated with token balances
   const assetsWithPrices = portfolioAssets;
 
-  const isLoading = utxosQuery.isLoading;
+  const isLoading = utxosQuery.isLoading || isReloading;
 
   return (
     <>
@@ -135,73 +135,83 @@ export const PortfolioPanel = ({ hasher }: { hasher: LightWasm }) => {
       {connected &&
         publicKey &&
         !isLoading &&
-        assetsWithPrices.length > 0 &&
-        assetsWithPrices.map((asset, index) => (
-          <div
-            key={index}
-            className="py-4 px-6 hover:bg-secondary-bg transition-colors flex items-center"
-          >
-            {/* Left Side - Asset Info */}
-            <div className="flex items-center gap-3 flex-1">
-              {/* Asset Icon */}
-              {(() => {
-                const displayLogo = getTokenLogo(asset.symbol);
-                
-                return displayLogo ? (
-                  <img
-                    src={displayLogo}
-                    alt={asset.symbol}
-                    className="w-10 h-10 rounded-full"
-                  />
-                ) : (
-                  <div className="w-10 h-10 rounded-full bg-linear-to-br from-tertiary-text to-secondary-text flex items-center justify-center">
-                    <span className="text-primary-text font-bold text-xs">
-                      {asset.symbol.slice(0, 2).toUpperCase()}
-                    </span>
-                  </div>
-                );
-              })()}
-
-              {/* Asset Name and Details */}
-              <div>
-                <div className="mb-1">
-                  <span className="text-primary-text font-medium">
-                    {asset.symbol}
-                  </span>
-                </div>
-
-              </div>
-            </div>
-
-            {/* Middle - Mint Column */}
-            <div className="flex items-center justify-center flex-1">
-              <div className="text-sm text-secondary-text font-mono">
-                {asset.iconType === "sol" && "Native Token"}
-                {asset.iconType === "token" &&
-                  asset.mint &&
-                  `${asset.mint.slice(0, 4)}...${asset.mint.slice(-4)}`}
-                {asset.iconType === "token" && !asset.mint && "N/A"}
-              </div>
-            </div>
-
-            {/* Right Side - Balance and Action */}
-            <div className="flex items-center gap-4 flex-1 justify-end">
-              <div className="text-right">
-                <div className="text-primary-text font-medium">
-                  {asset.quantityDisplay}
-                </div>
-              </div>
-
-              {/* Swap Icon */}
-              <Link
-                to="/swap"
-                className="p-2 hover:bg-primary-bg rounded transition-colors cursor-pointer"
+        assetsWithPrices.length > 0 && (
+          <>
+            {assetsWithPrices.map((asset, index) => (
+              <div
+                key={index}
+                className="py-4 px-6 hover:bg-secondary-bg transition-colors flex items-center"
               >
-                <SwapIcon className="w-5 h-5 text-secondary-text" />
-              </Link>
+                {/* Left Side - Asset Info */}
+                <div className="flex items-center gap-3 flex-1">
+                  {/* Asset Icon */}
+                  {(() => {
+                    const displayLogo = getTokenLogo(asset.symbol);
+                    
+                    return displayLogo ? (
+                      <img
+                        src={displayLogo}
+                        alt={asset.symbol}
+                        className="w-10 h-10 rounded-full"
+                      />
+                    ) : (
+                      <div className="w-10 h-10 rounded-full bg-linear-to-br from-tertiary-text to-secondary-text flex items-center justify-center">
+                        <span className="text-primary-text font-bold text-xs">
+                          {asset.symbol.slice(0, 2).toUpperCase()}
+                        </span>
+                      </div>
+                    );
+                  })()}
+
+                  {/* Asset Name and Details */}
+                  <div>
+                    <div className="mb-1">
+                      <span className="text-primary-text font-medium">
+                        {asset.symbol}
+                      </span>
+                    </div>
+
+                  </div>
+                </div>
+
+                {/* Middle - Mint Column */}
+                <div className="flex items-center justify-center flex-1">
+                  <div className="text-sm text-secondary-text font-mono">
+                    {asset.iconType === "sol" && "Native Token"}
+                    {asset.iconType === "token" &&
+                      asset.mint &&
+                      `${asset.mint.slice(0, 4)}...${asset.mint.slice(-4)}`}
+                    {asset.iconType === "token" && !asset.mint && "N/A"}
+                  </div>
+                </div>
+
+                {/* Right Side - Balance and Action */}
+                <div className="flex items-center gap-4 flex-1 justify-end">
+                  <div className="text-right">
+                    <div className="text-primary-text font-medium">
+                      {asset.quantityDisplay}
+                    </div>
+                  </div>
+
+                  {/* Swap Icon */}
+                  <Link
+                    to="/swap"
+                    className="p-2 hover:bg-primary-bg rounded transition-colors cursor-pointer"
+                  >
+                    <SwapIcon className="w-5 h-5 text-secondary-text" />
+                  </Link>
+                </div>
+              </div>
+            ))}
+            
+            {/* Info text at the bottom */}
+            <div className="py-4 px-6 border-t border-[#8D1CF21F]">
+              <p className="text-xs text-secondary-text text-center">
+                These are your private shielded assets. If balances are incorrect, use the "Reload UTXOs" button above to refresh.
+              </p>
             </div>
-          </div>
-        ))}
+          </>
+        )}
     </>
   );
 };

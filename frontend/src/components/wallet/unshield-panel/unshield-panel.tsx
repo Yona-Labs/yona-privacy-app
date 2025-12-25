@@ -1,6 +1,7 @@
 import { useWallet } from "@solana/wallet-adapter-react";
 import { useState } from "react";
 import { Loader2 } from "lucide-react";
+import { useNavigate } from "react-router";
 import { usePrivateBalance } from "@/lib/hooks";
 import { LightWasm } from "@lightprotocol/hasher.rs";
 import { TokenInput, type TokenOption } from "@/components/TokenInput";
@@ -12,6 +13,7 @@ import { TokenInfo } from "@/lib/hooks/useTokens";
 
 export const UnshieldPanel = ({ hasher }: { hasher: LightWasm }) => {
   const { publicKey, connected, connecting } = useWallet();
+  const navigate = useNavigate();
   const [recipientAddress, setRecipientAddress] = useState("");
   const [amount, setAmount] = useState("");
   const [selectedToken, setSelectedToken] = useState<string>(
@@ -35,9 +37,11 @@ export const UnshieldPanel = ({ hasher }: { hasher: LightWasm }) => {
   );
 
   // Get balance for currently selected token
-  const privateBalance = balanceQueries[
+  const privateBalanceQuery = balanceQueries[
     SUPPORTED_TOKENS.findIndex(t => t.address === selectedToken)
-  ]?.data ?? 0;
+  ];
+  const privateBalance = privateBalanceQuery?.data ?? 0;
+  const isBalanceLoading = privateBalanceQuery?.isLoading ?? true;
 
   const { handleWithdraw, isWithdrawing, error, statusMessage } =
     useUnshieldWithdraw(hasher);
@@ -53,6 +57,10 @@ export const UnshieldPanel = ({ hasher }: { hasher: LightWasm }) => {
     name: token.name,
     balance: (balanceQueries[index]?.data ?? 0).toFixed(6),
   }));
+
+  const handleMaxClick = () => {
+    setAmount(privateBalance.toString());
+  };
 
   const onWithdraw = async () => {
     const success = await handleWithdraw(
@@ -120,17 +128,27 @@ export const UnshieldPanel = ({ hasher }: { hasher: LightWasm }) => {
             balanceOverride={`${privateBalance.toFixed(4)} ${
               selectedTokenInfo?.symbol || "SOL"
             }`}
+            onMaxClick={!isBalanceLoading ? handleMaxClick : undefined}
           />
 
-          <Button
-            onClick={onWithdraw}
-            disabled={isWithdrawing || !amount || !recipientAddress}
-            className="w-full"
-            isLoading={isWithdrawing}
-            loadingInfo="Processing..."
-          >
-            Unshield
-          </Button>
+          {!isBalanceLoading && parseFloat(amount) > privateBalance && amount ? (
+            <Button
+              onClick={() => navigate("/shield")}
+              className="w-full bg-primary-button-bg"
+            >
+              Insufficient balance. Shield first ↗
+            </Button>
+          ) : (
+            <Button
+              onClick={onWithdraw}
+              disabled={isWithdrawing || !amount || !recipientAddress || isBalanceLoading}
+              className="w-full"
+              isLoading={isBalanceLoading ? true : isWithdrawing}
+              loadingInfo={isBalanceLoading ? "Loading balance..." : "Processing..."}
+            >
+              Unshield
+            </Button>
+          )}
 
           {error && (
             <div className="bg-error/20 border border-error rounded-lg p-3">

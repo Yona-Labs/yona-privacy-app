@@ -29,6 +29,7 @@ interface TokenInputProps {
   transparentBackground?: boolean;
   maxDecimals?: number;
   hideTokenSelector?: boolean;
+  onMaxClick?: () => void;
 }
 
 export const TokenInput: FC<TokenInputProps> = ({
@@ -48,6 +49,7 @@ export const TokenInput: FC<TokenInputProps> = ({
   transparentBackground = false,
   maxDecimals = 9,
   hideTokenSelector = false,
+  onMaxClick,
 }) => {
   const inputRef = useRef<HTMLInputElement>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -93,6 +95,14 @@ export const TokenInput: FC<TokenInputProps> = ({
         <div className="flex items-center gap-2">
           <Wallet size={14} />
           {balance}
+          {onMaxClick && !disabled && (
+            <button
+              onClick={onMaxClick}
+              className="ml-1 px-2 py-0.5 text-xs font-semibold text-primary hover:text-primary/80 transition-colors cursor-pointer bg-primary/10 hover:bg-primary/20 rounded"
+            >
+              MAX
+            </button>
+          )}
         </div>
       </div>
 

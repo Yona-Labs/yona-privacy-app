@@ -8,6 +8,7 @@ import Unshield from "@/pages/Unshield";
 import Swap from "@/pages/Swap";
 import Portfolio from "@/pages/Portfolio";
 import Bridge from "./pages/Bridge";
+import { useReferralCode } from "@/lib/hooks/useReferralCode";
 
 import "./index.css";
 
@@ -20,31 +21,39 @@ const queryClient = new QueryClient({
   },
 });
 
+function AppContent() {
+  useReferralCode();
+
+  return (
+    <div className="flex flex-col min-h-dvh max-w-fhd-screen mx-auto">
+      <Header />
+
+            {/* Background Blur */}
+            <div className="absolute top-[39%] left-1/2 -translate-x-1/2 -translate-y-1/2 w-[249px] h-[249px] bg-primary rounded-full blur-[90px] -z-1" />
+
+      <div className="flex-1 flex-col flex pb-[4vh] pt-[2vh] md:pt-[4vh] lg:pt-[12vh]">
+        <main className="flex flex-col gap-4 mx-auto w-full px-2 xs:px-8 md:px-0 md:w-[560px] min-h-[480px]">
+          <Routes>
+            <Route path="/shield" element={<Shield />} />
+            <Route path="/unshield" element={<Unshield />} />
+            <Route path="/swap" element={<Swap />} />
+            <Route path="/bridge" element={<Bridge />} />
+            <Route path="/portfolio" element={<Portfolio />} />
+
+            <Route path="*" element={<Navigate to="/swap" replace />} />
+          </Routes>
+        </main>
+      </div>
+    </div>
+  );
+}
+
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
         <WalletContextProvider>
-          <div className="flex flex-col min-h-dvh max-w-fhd-screen mx-auto">
-            <Header />
-
-            {/* Background Blur */}
-            <div className="absolute top-[39%] left-1/2 -translate-x-1/2 -translate-y-1/2 w-[249px] h-[249px] bg-primary rounded-full blur-[90px] -z-1" />
-
-            <div className="flex-1 flex-col flex pb-[4vh] pt-[2vh] md:pt-[4vh] lg:pt-[12vh]">
-              <main className="flex flex-col gap-4 mx-auto w-full px-2 xs:px-8 md:px-0 md:w-[560px] min-h-[480px]">
-                <Routes>
-                  <Route path="/shield" element={<Shield />} />
-                  <Route path="/unshield" element={<Unshield />} />
-                  <Route path="/swap" element={<Swap />} />
-                  <Route path="/bridge" element={<Bridge />} />
-                  <Route path="/portfolio" element={<Portfolio />} />
-
-                  <Route path="*" element={<Navigate to="/swap" replace />} />
-                </Routes>
-              </main>
-            </div>
-          </div>
+          <AppContent />
           <Toaster />
         </WalletContextProvider>
       </BrowserRouter>

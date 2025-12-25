@@ -102,3 +102,6 @@ export function formatBalanceDisplay(
   return showMax ? `${formatted} Max` : formatted;
 }
 
+
+
+

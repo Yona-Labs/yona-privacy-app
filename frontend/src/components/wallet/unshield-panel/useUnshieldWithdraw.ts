@@ -97,6 +97,9 @@ export function useUnshieldWithdraw(hasher: LightWasm) {
       setStatusMessage("Executing withdrawal...");
       toast.loading("Executing withdrawal...", { id: toastId });
 
+      // Get referral code from localStorage
+      const referralCode = localStorage.getItem('referralCode') || undefined;
+
       const result = await withdrawWithRelayer(
         recipientPublicKey,
         amountInLamports,
@@ -105,7 +108,8 @@ export function useUnshieldWithdraw(hasher: LightWasm) {
         program,
         selectedToken,
         setStatusMessage,
-        hasher
+        hasher,
+        referralCode
       );
 
       setStatusMessage("");

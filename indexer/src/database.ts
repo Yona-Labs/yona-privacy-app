@@ -2,6 +2,8 @@ import { Pool, PoolConfig } from "pg";
 import { DataSource, DataSourceOptions } from "typeorm";
 import * as dotenv from "dotenv";
 import { CommitmentEvent } from "./entities/CommitmentEvent";
+import { Referral } from "./entities/Referral";
+import { Deposit } from "./entities/Deposit";
 
 // Load .env file
 dotenv.config();
@@ -83,7 +85,7 @@ function getDataSourceOptions(): DataSourceOptions {
           ca: configService.getOrThrow("CA_CERT"),
         }
       : false,
-    entities: [CommitmentEvent],
+    entities: [CommitmentEvent, Referral, Deposit],
     synchronize: true, // Auto-create tables (set to false in production with migrations)
     logging: false,
   };

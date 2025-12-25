@@ -74,7 +74,7 @@ export async function deposit(
     currentNextIndex = data.nextIndex;
   } catch (error) {
     console.error("Failed to fetch root and nextIndex from API, exiting");
-    return; // Return early without a fallback
+    throw new Error("Failed to fetch Merkle tree data from indexer. Please ensure the indexer is running and accessible.");
   }
 
 

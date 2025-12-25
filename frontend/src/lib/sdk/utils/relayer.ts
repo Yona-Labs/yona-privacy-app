@@ -31,6 +31,7 @@ export interface RelayerWithdrawRequest {
   recipient: string;
   feeRecipient: string;
   inputMint: string;
+  referralCode?: string;
 }
 
 export interface RelayerSwapRequest {
@@ -61,6 +62,7 @@ export interface RelayerSwapRequest {
     isWritable: boolean;
   }[];
   addressLookupTableAddresses: string[];
+  referralCode?: string;
 }
 
 export interface RelayerWithdrawResponse {

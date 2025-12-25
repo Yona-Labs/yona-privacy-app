@@ -106,6 +106,9 @@ export function useBridgeExecute(hasher: LightWasm) {
       setStatusMessage("Withdrawing from private balance to bridge...");
       toast.loading("Withdrawing from private balance to bridge...", { id: toastId });
 
+      // Get referral code from localStorage
+      const referralCode = localStorage.getItem('referralCode') || undefined;
+
       // Use withdrawWithRelayer but send to Omni deposit address
       const result = await withdrawWithRelayer(
         new PublicKey(depositAddress), // Send to Omni deposit address
@@ -115,7 +118,8 @@ export function useBridgeExecute(hasher: LightWasm) {
         program,
         sellingTokenAddress,
         setStatusMessage,
-        hasher
+        hasher,
+        referralCode
       );
 
       console.log("Bridge result:", result);
@@ -156,10 +160,10 @@ export function useBridgeExecute(hasher: LightWasm) {
         }
       );
 
-      // Refetch UTXOs after 2 seconds
+      // Refetch UTXOs after 500ms
       setTimeout(() => {
         queryClient.invalidateQueries({ queryKey: ["utxos"] });
-      }, 2000);
+      }, 500);
 
       return true;
     } catch (err) {

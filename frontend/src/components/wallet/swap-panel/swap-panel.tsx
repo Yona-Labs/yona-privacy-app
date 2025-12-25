@@ -2,6 +2,7 @@ import { useWallet } from "@solana/wallet-adapter-react";
 import { useWalletModal } from "@solana/wallet-adapter-react-ui";
 import { useState, useEffect, useCallback } from "react";
 import { Loader2, BananaIcon } from "lucide-react";
+import { useNavigate } from "react-router";
 import {
   usePrivateBalance,
   useJupiterQuote,
@@ -84,11 +85,12 @@ function calculateSwapValues(
 export const SwapPanel = ({ hasher }: { hasher: LightWasm }) => {
   const { publicKey, connected, connecting } = useWallet();
   const { setVisible } = useWalletModal();
+  const navigate = useNavigate();
   const [sellingAmount, setSellingAmount] = useState("");
   const [sellingAmountInput, setSellingAmountInput] = useState("");
   const [sellingToken, setSellingToken] = useState(SUPPORTED_TOKENS[0]);
   const [buyingToken, setBuyingToken] = useState(SUPPORTED_TOKENS[1]);
-  const [slippageBps] = useState(100);
+  const [slippageBps] = useState(30);
 
   // Debounce selling amount changes
   useEffect(() => {
@@ -120,14 +122,22 @@ export const SwapPanel = ({ hasher }: { hasher: LightWasm }) => {
   );
 
   // Get balances for currently selected tokens
-  const sellingBalance =
-    balanceQueries[
-      SUPPORTED_TOKENS.findIndex((t) => t.address === sellingToken.address)
-    ]?.data ?? 0;
+  const sellingBalanceQuery = balanceQueries[
+    SUPPORTED_TOKENS.findIndex((t) => t.address === sellingToken.address)
+  ];
+  const sellingBalance = sellingBalanceQuery?.data ?? 0;
+  const isSellingBalanceLoading = sellingBalanceQuery?.isLoading ?? true;
+  
   const buyingBalance =
     balanceQueries[
       SUPPORTED_TOKENS.findIndex((t) => t.address === buyingToken.address)
     ]?.data ?? 0;
+
+  const handleMaxClick = useCallback(() => {
+    const maxAmount = sellingBalance.toString();
+    setSellingAmountInput(maxAmount);
+    setSellingAmount(maxAmount);
+  }, [sellingBalance]);
 
   // Get Jupiter quote
   const quoteQuery = useJupiterQuote(
@@ -223,9 +233,10 @@ export const SwapPanel = ({ hasher }: { hasher: LightWasm }) => {
             }}
             balanceOverride={
               connected && publicKey
-                ? `${sellingBalance.toFixed(4)} ${sellingToken.symbol} Max`
+                ? `${sellingBalance.toFixed(4)} ${sellingToken.symbol}`
                 : `0.0000 ${sellingToken.symbol}`
             }
+            onMaxClick={connected && publicKey && !isSellingBalanceLoading ? handleMaxClick : undefined}
           />
         </div>
 
@@ -284,22 +295,31 @@ export const SwapPanel = ({ hasher }: { hasher: LightWasm }) => {
         </div>
 
         {connected && publicKey ? (
-          <Button
-            onClick={onExecuteSwap}
-            disabled={
-              isSwapping ||
-              !sellingAmount ||
-              !buyingAmount ||
-              sellingToken.address === buyingToken.address ||
-              quoteQuery.isFetching ||
-              !quoteQuery.data
-            }
-            className="w-full"
-            isLoading={isSwapping}
-            loadingInfo="Executing Swap..."
-          >
-            Execute
-          </Button>
+          parseFloat(sellingAmount) > sellingBalance && !quoteQuery.isFetching ? (
+            <Button
+              onClick={() => navigate("/shield")}
+              className="w-full bg-primary-button-bg"
+            >
+              Insufficient balance. Shield first ↗
+            </Button>
+          ) : (
+            <Button
+              onClick={onExecuteSwap}
+              disabled={
+                isSwapping ||
+                !sellingAmount ||
+                !buyingAmount ||
+                sellingToken.address === buyingToken.address ||
+                quoteQuery.isFetching ||
+                !quoteQuery.data
+              }
+              className="w-full"
+              isLoading={isSwapping}
+              loadingInfo="Executing Swap..."
+            >
+              Execute
+            </Button>
+          )
         ) : (
           <Button
             onClick={() => setVisible(true)}

@@ -2,6 +2,7 @@ import { useWallet } from "@solana/wallet-adapter-react";
 import { useWalletModal } from "@solana/wallet-adapter-react-ui";
 import { useState, useEffect, useCallback } from "react";
 import { Loader2, BananaIcon } from "lucide-react";
+import { useNavigate } from "react-router";
 import {
   usePrivateBalance,
   useNearIntentsQuote, 
@@ -95,6 +96,7 @@ const BRIDGE_TOKENS: BridgeTokenOption[] = [
 export const BridgePanel = ({ hasher }: { hasher: LightWasm }) => {
   const { publicKey, connected, connecting } = useWallet();
   const { setVisible } = useWalletModal();
+  const navigate = useNavigate();
   const [sellingAmount, setSellingAmount] = useState("");
   const [sellingAmountInput, setSellingAmountInput] = useState("");
   const [sellingToken, setSellingToken] = useState(SOL_TOKEN);
@@ -118,7 +120,6 @@ export const BridgePanel = ({ hasher }: { hasher: LightWasm }) => {
     setSellingAmountInput(value);
   }, []);
 
-  
   // Convert SUPPORTED_TOKENS to TokenOption format for usePrivateBalance
   const tokenInfos: TokenInfo[] = SUPPORTED_TOKENS.map((token) => {
     const tokenInfo = getTokenInfo(token.address);
@@ -136,10 +137,17 @@ export const BridgePanel = ({ hasher }: { hasher: LightWasm }) => {
   );
 
   // Get balances for currently selected tokens
-  const sellingBalance = balanceQueries[
+  const sellingBalanceQuery = balanceQueries[
     SUPPORTED_TOKENS.findIndex(t => t.address === sellingToken.address)
-  ]?.data ?? 0;
+  ];
+  const sellingBalance = sellingBalanceQuery?.data ?? 0;
+  const isBalanceLoading = sellingBalanceQuery?.isLoading ?? true;
 
+  const handleMaxClick = useCallback(() => {
+    const maxAmount = sellingBalance.toString();
+    setSellingAmountInput(maxAmount);
+    setSellingAmount(maxAmount);
+  }, [sellingBalance]);
 
   // Convert SUPPORTED_TOKENS to TokenOption format with private balances for "From" selector
   const tokenOptions: TokenOption[] = SUPPORTED_TOKENS.map((token, index) => ({
@@ -231,9 +239,10 @@ export const BridgePanel = ({ hasher }: { hasher: LightWasm }) => {
               }}
               balanceOverride={
                 connected && publicKey
-                  ? `${sellingBalance.toFixed(4)} ${sellingToken.symbol} Max`
+                  ? `${sellingBalance.toFixed(4)} ${sellingToken.symbol}`
                   : `0.0000 ${sellingToken.symbol}`
               }
+              onMaxClick={connected && publicKey ? handleMaxClick : undefined}
             />
           </div>
 
@@ -324,24 +333,34 @@ export const BridgePanel = ({ hasher }: { hasher: LightWasm }) => {
         
 
           {connected && publicKey ? (
-            <Button
-              onClick={onExecuteBridge}
-              disabled={
-                isSwapping ||
-                !sellingAmount ||
-                !buyingAmount ||
-                sellingToken.address === buyingToken.address ||
-                quoteQuery.isFetching ||
-                !quoteQuery.data ||
-                !destinationAddress ||
-                !refundAddress
-              }
-              className="w-full"
-              isLoading={quoteQuery.isFetching?true:isSwapping}
-              loadingInfo={quoteQuery.isFetching?"Calculating quote...":"Executing Swap..."}
-            >
-              Execute
-            </Button>
+            !isBalanceLoading && !quoteQuery.isFetching && parseFloat(sellingAmount) > sellingBalance && sellingAmount ? (
+              <Button
+                onClick={() => navigate("/shield")}
+                className="w-full bg-primary-button-bg"
+              >
+                Insufficient balance. Shield first ↗
+              </Button>
+            ) : (
+              <Button
+                onClick={onExecuteBridge}
+                disabled={
+                  isSwapping ||
+                  !sellingAmount ||
+                  !buyingAmount ||
+                  sellingToken.address === buyingToken.address ||
+                  quoteQuery.isFetching ||
+                  !quoteQuery.data ||
+                  !destinationAddress ||
+                  !refundAddress ||
+                  isBalanceLoading
+                }
+                className="w-full"
+                isLoading={quoteQuery.isFetching || isBalanceLoading ? true : isSwapping}
+                loadingInfo={isBalanceLoading ? "Loading balance..." : quoteQuery.isFetching ? "Requesting intent quote..." : "Executing bridge..."}
+              >
+                Execute
+              </Button>
+            )
           ) : (
             <Button
               onClick={() => setVisible(true)}

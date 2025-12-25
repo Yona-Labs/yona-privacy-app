@@ -14,6 +14,8 @@ import {
   closeDataSource,
 } from "./database";
 import { CommitmentEvent } from "./entities/CommitmentEvent";
+import { Referral } from "./entities/Referral";
+import { Deposit } from "./entities/Deposit";
 
 /**
  * Main application server
@@ -60,7 +62,12 @@ export class Server {
     const dataSource = await getDataSource();
     this.fastify.log.info("TypeORM DataSource initialized");
 
-    if (this.config.relayerEnabled) {
+    // Get repositories
+    const commitmentRepository = dataSource.getRepository(CommitmentEvent);
+    const referralRepository = dataSource.getRepository(Referral);
+    const depositRepository = dataSource.getRepository(Deposit);
+
+    if (this.config.relayerEnabled) { 
       this.fastify.log.info(
         `Relayer enabled: ${this.config.relayerKeypair!.publicKey.toString()}`
       );
@@ -68,8 +75,8 @@ export class Server {
 
       // Initialize job queue for async withdrawal and swap processing
       this.jobQueue = new JobQueue(
-        (request) => handleWithdraw(request, this.config),
-        (request) => handleSwap(request, this.config)
+        (request) => handleWithdraw(request, this.config, referralRepository),
+        (request) => handleSwap(request, this.config, referralRepository)
       );
       this.fastify.log.info(
         "Job queue initialized for async withdrawal and swap processing"
@@ -93,15 +100,13 @@ export class Server {
     this.connection = new Connection(this.config.solanaRpcUrl, "confirmed");
     this.fastify.log.info("Connected to Solana");
 
-    // Get commitment repository
-    const commitmentRepository = dataSource.getRepository(CommitmentEvent);
-
     // Create event listener
     this.eventListener = new SolanaEventListener(
       this.connection,
       this.config.programId,
       this.merkleTree,
-      commitmentRepository
+      commitmentRepository,
+      depositRepository
     );
 
     // Setup routes

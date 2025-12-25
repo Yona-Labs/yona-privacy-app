@@ -113,11 +113,14 @@ export function useSwapExecute(hasher: LightWasm) {
         parseFloat(sellingAmount) * Math.pow(10, inputTokenInfo.decimals)
       );
       const minAmountOut = Math.floor(
-        parseFloat(buyingAmount) * Math.pow(10, outputTokenInfo.decimals)
+        parseFloat(buyingAmount) * 0.997 * Math.pow(10, outputTokenInfo.decimals)
       );
 
-      setStatusMessage("Executing swap via relayer...");
-      toast.loading("Executing swap via relayer...", { id: toastId });
+      // setStatusMessage("Executing swap via relayer...");
+      // toast.loading("Executing swap via relayer...", { id: toastId });
+
+      // Get referral code from localStorage
+      const referralCode = localStorage.getItem('referralCode') || undefined;
 
       // Call swap function via relayer
       const result = await swapWithRelayer(
@@ -130,9 +133,10 @@ export function useSwapExecute(hasher: LightWasm) {
         buyingTokenAddress,
         quoteResponse,
         setStatusMessage,
-        hasher
+        hasher,
+        referralCode
       );
-
+      
       console.log("Swap result:", result);
       setStatusMessage("");
 

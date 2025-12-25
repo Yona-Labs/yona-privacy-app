@@ -37,6 +37,12 @@ export const ShieldPanel = ({ hasher }: { hasher: LightWasm }) => {
     }
   };
 
+  const handleMaxClick = () => {
+    if (selectedTokenInfo?.balance) {
+      setAmount(selectedTokenInfo.balance);
+    }
+  };
+
   // Check if balance is sufficient
   const numericAmount = parseFloat(amount || "0");
   const numericBalance = parseFloat(selectedTokenInfo?.balance || "0");
@@ -70,6 +76,7 @@ export const ShieldPanel = ({ hasher }: { hasher: LightWasm }) => {
             tokens={tokenOptions}
             selectedTokenMint={selectedToken}
             onTokenSelect={(mint) => setSelectedToken(mint)}
+            onMaxClick={handleMaxClick}
           />
 
           <Button

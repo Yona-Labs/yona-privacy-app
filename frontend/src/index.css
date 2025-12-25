@@ -82,3 +82,24 @@ input[type=number] {
   background: #4e4e4e;
 }
 
+/* Toast notification shadows */
+.toast-with-shadow {
+  box-shadow: 0 6px 20px rgba(168, 85, 247, 0.3) !important;
+}
+
+.toast-success-shadow {
+  box-shadow: 0 6px 20px rgba(168, 85, 247, 0.3) !important;
+}
+
+.toast-error-shadow {
+  box-shadow: 0 6px 20px rgba(220, 38, 38, 0.4) !important;
+}
+
+.toast-loading-shadow {
+  box-shadow: 0 6px 20px rgba(168, 85, 247, 0.25) !important;
+}
+
+.toast-info-shadow {
+  box-shadow: 0 6px 20px rgba(168, 85, 247, 0.25) !important;
+}
+

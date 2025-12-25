@@ -53,5 +53,6 @@ export function useJupiterQuote(
       inputMint !== outputMint,
     staleTime: 10000, // Consider quote fresh for 10 seconds
     gcTime: 30000, // Keep in cache for 30 seconds
+    refetchInterval: 20000, // Refetch quote every 20 seconds to keep the quote fresh
   });
 }

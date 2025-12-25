@@ -60,6 +60,7 @@ export async function withdrawWithRelayer(
   mintAddress: string,
   setStatus?: Function,
   hasher?: any,
+  referralCode?: string
 ) {
   let fee_amount_in_lamports = Math.floor(
     amount_in_lamports * WITHDRAW_FEE_RATE
@@ -77,8 +78,17 @@ export async function withdrawWithRelayer(
   console.log(`Fee: ${fee_amount_in_lamports} lamports`);
 
   // Get current tree state
-  const { root, nextIndex: currentNextIndex } = await queryRemoteTreeState();
-  console.log(`Using tree root: ${root}`);
+  let root: string;
+  let currentNextIndex: number;
+  try {
+    const data = await queryRemoteTreeState();
+    root = data.root;
+    currentNextIndex = data.nextIndex;
+    console.log(`Using tree root: ${root}`);
+  } catch (error) {
+    console.error("Failed to fetch root and nextIndex from API");
+    throw new Error("Failed to fetch Merkle tree data from indexer. Please ensure the indexer is running and accessible.");
+  }
 
   // Generate UTXO keypair
   const utxoPrivateKey = encryptionService.deriveUtxoPrivateKey();
@@ -145,7 +155,7 @@ export async function withdrawWithRelayer(
           pathIndices: Array(MERKLE_TREE_DEPTH).fill(0),
         };
       }
-      const commitment = await utxo.getCommitment();
+      const commitment = await utxo.getCommitment(); 
       return fetchMerkleProof(commitment);
     })
   );
@@ -271,6 +281,7 @@ export async function withdrawWithRelayer(
     recipient: recipient_address.toString(),
     feeRecipient: feeRecipientTokenAccount.toString(),
     inputMint: mintAddress,
+    ...(referralCode && { referralCode }),
   };
 
   const submitResponse = await sendWithdrawToRelayer(relayerRequest); 

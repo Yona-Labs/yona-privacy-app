@@ -44,7 +44,8 @@ export async function swapWithRelayer(
   outputMintAddress: string,
   quoteResponse: JupiterQuoteResponse,
   setStatus?: Function,
-  hasher?: any
+  hasher?: any,
+  referralCode?: string
 ) {
   const [globalConfigAccount] = findGlobalConfigPDA(program.programId);
 
@@ -326,6 +327,7 @@ export async function swapWithRelayer(
     jupiterSwapData: jupiterSwapInstruction.data.toString('base64'),
     jupiterRemainingAccounts,
     addressLookupTableAddresses: swapResponse.addressLookupTableAddresses,
+    ...(referralCode && { referralCode }),
   };
 
   const submitResponse = await sendSwapToRelayer(relayerRequest);

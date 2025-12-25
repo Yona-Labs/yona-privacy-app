@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
-import { Menu, X } from "lucide-react";
+import { Link } from "react-router";
+import { Menu, X, BookText, BookOpen } from "lucide-react";
 import { WalletButton } from "@/components/wallet";
 import { NavLink } from "@/components/NavLink";
 import {
@@ -43,7 +44,9 @@ export function Header() {
       <div className={`relative flex items-center gap-y-4 py-4 lg:px-8 ${isMobile ? 'flex-col' : 'flex-row justify-between px-4'}`}>
         <div className={`flex justify-between items-center ${isMobile ? 'w-full' : 'w-fit'}`}>
           <h1 className={`flex gap-2 items-end lg:flex-1 shrink-0 text-primary-text h-full ${isMobile ? 'justify-center' : 'justify-start'}`}>
-            <img src="icons/logo.svg" alt="Yona.cash Logo" className="h-8" />
+            <Link to="/" className="cursor-pointer hover:opacity-80 transition-opacity">
+              <img src="icons/logo.svg" alt="Yona.cash Logo" className="h-8" />
+            </Link>
           </h1>
           
           {/* Hamburger Menu Button - Mobile Only */}
@@ -72,6 +75,15 @@ export function Header() {
         </nav>
 
         <div className={`gap-4 items-center lg:flex w-fit ${isMobile ? 'hidden' : 'flex justify-end'}`}>
+          <a
+            href="https://docs.yona.cash"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="p-2 hover:bg-primary-bg rounded-lg transition-colors cursor-pointer"
+            title="Documentation"
+          >
+            <BookText className="h-5 w-5 text-secondary-text" />
+          </a>
           <WalletButton />
         </div>
       </div>
@@ -97,7 +109,17 @@ export function Header() {
                 <NavLink to="/portfolio" name="Portfolio" icon={PortfolioIcon} />
               </li>
             </ul>
-            <div className="mt-4 pt-4 border-t border-primary-border">
+            <div className="mt-4 pt-4 border-t border-primary-border space-y-3">
+              <a
+                href="https://docs.yona.cash"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-2 px-4 py-2 hover:bg-primary-bg rounded-lg transition-colors cursor-pointer"
+                title="Documentation"
+              >
+                <BookText className="h-5 w-5 text-secondary-text" />
+                <span className="text-secondary-text font-semibold">Docs</span>
+              </a>
               <WalletButton />
             </div>
           </nav>

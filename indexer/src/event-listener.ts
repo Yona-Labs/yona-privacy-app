@@ -11,6 +11,7 @@ import { parseLogs } from "@debridge-finance/solana-transaction-parser";
 import { decodeEvent, ParsedEvent } from "./utils/event-decoder";
 import { IsNull, Not, Repository } from "typeorm";
 import { CommitmentEvent } from "./entities/CommitmentEvent";
+import { Deposit } from "./entities/Deposit";
 
 interface CommitmentEventData {
   commitment: string;
@@ -28,18 +29,21 @@ export class SolanaEventListener {
   private programId: PublicKey;
   private merkleTree: MerkleTree;
   private commitmentRepository: Repository<CommitmentEvent>;
+  private depositRepository: Repository<Deposit>;
   private isRunning: boolean = false;
 
   constructor(
     connection: Connection,
     programId: PublicKey,
     merkleTree: MerkleTree,
-    commitmentRepository: Repository<CommitmentEvent>
+    commitmentRepository: Repository<CommitmentEvent>,
+    depositRepository: Repository<Deposit>
   ) {
     this.connection = connection;
     this.programId = programId;
     this.merkleTree = merkleTree;
     this.commitmentRepository = commitmentRepository;
+    this.depositRepository = depositRepository;
   }
 
   /**
@@ -53,7 +57,7 @@ export class SolanaEventListener {
 
     console.log("Starting event listener...");
     console.log("Program ID:", this.programId.toString());
-    await this.commitmentRepository.delete({ commitment: Not(IsNull()) });
+    await this.commitmentRepository.delete({ commitment: Not(IsNull()) }); // CLEAR DB
     // Load existing commitments from database and rebuild merkle tree
     const lastDatabaseSignature = await this.loadCommitmentsFromDatabase();
     console.log("Last database signature:", lastDatabaseSignature);
@@ -111,7 +115,7 @@ export class SolanaEventListener {
         } commitments, root: ${this.merkleTree.root().substring(0, 16)}...`
       );
 
-      return events[events.length - 1].signature;
+      return events.length > 0 ? events[events.length - 1].signature : undefined;
     } catch (error) {
       console.error("Error loading commitments from database:", error);
       return undefined;
@@ -356,6 +360,25 @@ export class SolanaEventListener {
               }
             }
           }
+
+          // Check if this is a deposit transaction and track first deposits
+          if (events.length > 0) {
+            const isDeposit = parsedLogs.some(log => 
+              log.logMessages?.some((msg: string) => msg === "Instruction: Deposit") ||
+              log.rawLogs?.some((msg: string) => msg.includes("Program log: Instruction: Deposit"))
+            );
+
+            if (isDeposit) {
+              // Fetch full transaction to get user address
+              const tx = await this.connection.getParsedTransaction(signature, {
+                maxSupportedTransactionVersion: 0,
+              });
+
+              if (tx) {
+                await this.trackFirstDeposit(tx, Number(events[0]?.data?.index));
+              }
+            }
+          }
         } catch (error) {
           console.error("Error processing new transaction:", error);
         }
@@ -470,6 +493,18 @@ export class SolanaEventListener {
               );
             }
           }
+        }
+      }
+
+      // Check if this is a deposit transaction and track first deposits
+      if (events.length > 0 && events[0]?.data?.index !== undefined) {
+        const isDeposit = relevantLogs.some(log => 
+          log.logMessages?.some((msg: string) => msg === "Instruction: Deposit") ||
+          log.rawLogs?.some((msg: string) => msg.includes("Program log: Instruction: Deposit"))
+        );
+
+        if (isDeposit) {
+          await this.trackFirstDeposit(tx, Number(events[0].data.index));
         }
       }
     } catch (error) {
@@ -608,6 +643,43 @@ export class SolanaEventListener {
           )}...`
         );
       }
+    }
+  }
+
+  /**
+   * Track first deposit for a user
+   */
+  private async trackFirstDeposit(
+    tx: ParsedTransactionWithMeta,
+    commitmentIndex: number
+  ): Promise<void> {
+    try {
+      if (!commitmentIndex && commitmentIndex !== 0) {
+        return;
+      }
+
+      const accountKeys = tx.transaction.message.accountKeys;
+      if (!accountKeys || accountKeys.length === 0) {
+        return;
+      }
+
+      const userPubkey = accountKeys[0].pubkey.toString();
+      const existingDeposit = await this.depositRepository.findOne({
+        where: { user: userPubkey },
+      });
+
+      if (!existingDeposit) {
+        // This is the first deposit for this user
+        const deposit = this.depositRepository.create({
+          user: userPubkey,
+          commitmentIndex,
+        });
+        await this.depositRepository.save(deposit);
+        
+        console.log(`First deposit recorded for user ${userPubkey.substring(0, 8)}... at commitment index ${commitmentIndex}`);
+      }
+    } catch (error) {
+      console.error("Error tracking first deposit:", error);
     }
   }
 }

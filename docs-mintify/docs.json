@@ -16,8 +16,7 @@
           {
             "group": "Getting Started",
             "pages": [
-              "index",
-              "quickstart"
+              "index"
             ]
           },
           {
@@ -25,10 +24,7 @@
             "pages": [
               "concepts/technical",
               "concepts/fees",
-              "concepts/relayer",
-              "concepts/indexer",
-              "concepts/how-it-works",
-              "concepts/privacy"
+              "concepts/relayer"
             ]
           }
         ]

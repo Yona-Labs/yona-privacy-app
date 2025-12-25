@@ -19,6 +19,8 @@ import { Config } from './config';
 import IDL from './lib/idl/zkcash.json';
 import { findMerkleTreePDA, findGlobalConfigPDA, findNullifierPDAs } from './lib/derive';
 import { parseTransactionError } from './utils/errorParser';
+import { Repository } from 'typeorm';
+import { Referral } from './entities/Referral';
 
 export interface WithdrawRequest {
   proof: {
@@ -40,6 +42,7 @@ export interface WithdrawRequest {
   recipient: string;
   feeRecipient: string;
   inputMint: string;
+  referralCode?: string;
 }
 
 export interface SwapRequest {
@@ -70,6 +73,7 @@ export interface SwapRequest {
     isWritable: boolean;
   }[];
   addressLookupTableAddresses: string[];
+  referralCode?: string;
 }
 
 export interface WithdrawResponse {
@@ -167,7 +171,8 @@ async function buildWithdrawInstruction(
  */
 export async function handleWithdraw(
   request: WithdrawRequest,
-  config: Config
+  config: Config,
+  referralRepository?: Repository<Referral>
 ): Promise<WithdrawResponse> {
   if (!config.relayerEnabled || !config.relayerKeypair) {
     return {
@@ -182,6 +187,7 @@ export async function handleWithdraw(
       inputMint: request.inputMint,
       extAmount: request.extDataMinified.extAmount,
       fee: request.extDataMinified.fee,
+      referralCode: request.referralCode || 'none',
     });
 
     // Setup connection and program
@@ -320,6 +326,28 @@ export async function handleWithdraw(
 
     console.log('Transaction confirmed:', signature);
 
+    // Save referral data if referralCode is provided
+    if (request.referralCode && referralRepository) {
+      try {
+        const referral = referralRepository.create({
+          refer: request.referralCode,
+          signature,
+          amount: request.extDataMinified.extAmount,
+          inputAsset: request.inputMint,
+        });
+        await referralRepository.save(referral);
+        console.log('Referral data saved:', {
+          refer: request.referralCode,
+          signature,
+          amount: request.extDataMinified.extAmount,
+          inputAsset: request.inputMint,
+        });
+      } catch (error) {
+        console.error('Error saving referral data:', error);
+        // Don't fail the withdrawal if referral saving fails
+      }
+    }
+
     return {
       success: true,
       signature,
@@ -434,7 +462,8 @@ async function buildSwapInstruction(
  */
 export async function handleSwap(
   request: SwapRequest,
-  config: Config
+  config: Config,
+  referralRepository?: Repository<Referral>
 ): Promise<SwapResponse> {
   if (!config.relayerEnabled || !config.relayerKeypair) {
     return {
@@ -450,6 +479,7 @@ export async function handleSwap(
       extAmount: request.swapExtDataMinified.extAmount,
       extMinAmountOut: request.swapExtDataMinified.extMinAmountOut,
       fee: request.swapExtDataMinified.fee,
+      referralCode: request.referralCode || 'none',
     });
 
     // Setup connection and program
@@ -461,6 +491,46 @@ export async function handleSwap(
 
     const program = new Program(IDL as any, provider);
 
+
+    // Check if we need to create WSOL reserve token accounts
+    const inputMint = new PublicKey(request.inputMint);
+    const outputMint = new PublicKey(request.outputMint);
+    const [globalConfig] = findGlobalConfigPDA(config.programId);
+
+    const instructions = [];
+
+    // Check and create reserve token account for WSOL if needed
+    const checkAndCreateWSOLAccount = async (mint: PublicKey) => {
+      if (!mint.equals(NATIVE_MINT)) {
+        return;
+      }
+
+      const reserveTokenAccount = getAssociatedTokenAddressSync(
+        mint,
+        config.relayerKeypair!.publicKey,
+        true
+      );
+
+      try {
+        console.log('Checking WSOL reserve token account:', reserveTokenAccount.toString());
+        await getAccount(connection, reserveTokenAccount);
+        console.log('WSOL reserve token account already exists');
+      } catch (error) {
+        console.log('WSOL reserve token account does not exist, will create in same transaction');
+        const createAccountIx = createAssociatedTokenAccountInstruction(
+          config.relayerKeypair!.publicKey, // payer
+          reserveTokenAccount, // ata
+          config.relayerKeypair!.publicKey, // owner
+          mint // mint
+        );
+        instructions.push(createAccountIx);
+      }
+    };
+
+    // Check for both input and output mints
+    await checkAndCreateWSOLAccount(inputMint);
+    await checkAndCreateWSOLAccount(outputMint);
+    
     // Build swap instruction
     const swapInstruction = await buildSwapInstruction(
       program,
@@ -493,13 +563,14 @@ export async function handleSwap(
       }
     }
 
+    // Add compute budget and swap instruction
+    instructions.unshift(ComputeBudgetProgram.setComputeUnitLimit({ units: config.maxComputeUnits }));
+    instructions.push(swapInstruction);
+
     const message = new TransactionMessage({
       payerKey: config.relayerKeypair.publicKey,
       recentBlockhash: blockhash,
-      instructions: [
-        ComputeBudgetProgram.setComputeUnitLimit({ units: config.maxComputeUnits }),
-        swapInstruction,
-      ],
+      instructions: instructions,
     }).compileToV0Message(lookupTableAccounts);
 
     const transaction = new VersionedTransaction(message);
@@ -536,6 +607,28 @@ export async function handleSwap(
     }
 
     console.log('Swap transaction confirmed:', signature);
+
+    // Save referral data if referralCode is provided
+    if (request.referralCode && referralRepository) {
+      try {
+        const referral = referralRepository.create({
+          refer: request.referralCode,
+          signature,
+          amount: request.swapExtDataMinified.extAmount,
+          inputAsset: request.inputMint,
+        });
+        await referralRepository.save(referral);
+        console.log('Referral data saved:', {
+          refer: request.referralCode,
+          signature,
+          amount: request.swapExtDataMinified.extAmount,
+          inputAsset: request.inputMint,
+        });
+      } catch (error) {
+        console.error('Error saving referral data:', error);
+        // Don't fail the swap if referral saving fails
+      }
+    }
 
     return {
       success: true,
