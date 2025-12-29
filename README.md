@@ -1,10 +1,10 @@
-# Zert Protocol
+# Yona Protocol
 
 **Zero-Knowledge Privacy Layer for Solana**
 
-Zert is a Solana-based protocol for private DeFi using zero-knowledge proofs. It enables confidential deposits, swaps, withdrawals, and cross-chain bridges for SOL and any SPL tokens while maintaining full verifiability on-chain.
+Yona is a Solana-based protocol for private DeFi using zero-knowledge proofs. It enables confidential deposits, swaps, withdrawals, and cross-chain bridges for SOL and any SPL tokens while maintaining full verifiability on-chain.
 
-Built on a sparse Merkle tree for UTXO commitments and Groth16 ZKPs for transaction validity, Zert ensures privacy without compromising security or scalability.
+Built on a sparse Merkle tree for UTXO commitments and Groth16 ZKPs for transaction validity, Yona ensures privacy without compromising security or scalability.
 
 ---
 
